@@ -1,0 +1,723 @@
+<title>BhoomiSetu Handoff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#FAF9F7;
+  --surface:#FFFFFF;
+  --sunk:#F2F0EC;
+  --ink:#15181C;
+  --muted:#645F58;
+  --faint:#8C867E;
+  --rule:#E0DCD5;
+  --rule-strong:#C8C3BA;
+  --accent:#A8431B;
+  --accent-soft:#F6E9E2;
+  --ok:#2F6F4E;
+  --ok-soft:#E4EFE8;
+  --warn:#8A6212;
+  --warn-soft:#F6EEDC;
+  --crit:#A32C28;
+  --crit-soft:#F7E6E4;
+  --shadow:rgba(20,24,28,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#111418;
+    --surface:#171B20;
+    --sunk:#1D2228;
+    --ink:#E9E6E1;
+    --muted:#A29C93;
+    --faint:#7C766D;
+    --rule:#2A3037;
+    --rule-strong:#3A424B;
+    --accent:#E0774A;
+    --accent-soft:#2B1C15;
+    --ok:#6BB98C;
+    --ok-soft:#16241C;
+    --warn:#D7A73F;
+    --warn-soft:#241E10;
+    --crit:#E07A72;
+    --crit-soft:#2A1614;
+    --shadow:rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#111418;
+  --surface:#171B20;
+  --sunk:#1D2228;
+  --ink:#E9E6E1;
+  --muted:#A29C93;
+  --faint:#7C766D;
+  --rule:#2A3037;
+  --rule-strong:#3A424B;
+  --accent:#E0774A;
+  --accent-soft:#2B1C15;
+  --ok:#6BB98C;
+  --ok-soft:#16241C;
+  --warn:#D7A73F;
+  --warn-soft:#241E10;
+  --crit:#E07A72;
+  --crit-soft:#2A1614;
+  --shadow:rgba(0,0,0,.4);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:860px;margin:0 auto;padding-inline:20px;padding-block:0 72px}
+
+/* ---------- masthead ---------- */
+.mast{
+  border-bottom:1px solid var(--rule-strong);
+  padding-block:28px 18px;
+  margin-bottom:28px;
+}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);margin:0 0 10px;
+}
+h1{
+  font-family:"IBM Plex Serif",Georgia,serif;
+  font-size:clamp(28px,5vw,40px);
+  font-weight:600;line-height:1.1;margin:0 0 8px;
+  text-wrap:balance;letter-spacing:-.01em;
+}
+.sub{color:var(--muted);margin:0;font-size:15px;max-width:62ch}
+.stamp{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;
+  color:var(--faint);margin-top:14px;
+}
+
+/* ---------- alert ---------- */
+.alert{
+  background:var(--crit-soft);
+  border:1px solid var(--crit);
+  border-left-width:3px;
+  border-radius:3px;
+  padding:16px 18px;
+  margin:0 0 28px;
+}
+.alert h2{
+  font-family:"IBM Plex Sans",sans-serif;
+  font-size:13px;font-weight:600;margin:0 0 6px;
+  letter-spacing:.02em;color:var(--crit);
+  text-transform:uppercase;
+}
+.alert p{margin:0 0 8px}
+.alert p:last-child{margin-bottom:0}
+
+/* ---------- status grid ---------- */
+.status{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);
+  border-radius:3px;overflow:hidden;margin-bottom:34px;
+}
+.cell{background:var(--surface);padding:13px 15px}
+.cell .k{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--faint);
+  display:block;margin-bottom:5px;
+}
+.cell .v{
+  font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:500;
+  font-variant-numeric:tabular-nums;line-height:1.15;display:block;
+}
+.v.good{color:var(--ok)} .v.bad{color:var(--crit)} .v.mid{color:var(--warn)}
+
+/* ---------- sections ---------- */
+section{margin-bottom:40px;scroll-margin-top:16px}
+h2{
+  font-family:"IBM Plex Serif",Georgia,serif;
+  font-size:21px;font-weight:600;margin:0 0 4px;
+  letter-spacing:-.005em;text-wrap:balance;
+}
+h2 .num{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:500;
+  color:var(--accent);margin-right:10px;vertical-align:2px;
+}
+h3{
+  font-family:"IBM Plex Sans",sans-serif;font-size:14px;font-weight:600;
+  margin:24px 0 6px;letter-spacing:.005em;
+}
+.lede{color:var(--muted);margin:0 0 16px;max-width:66ch}
+p{margin:0 0 12px;max-width:68ch}
+ul{margin:0 0 12px;padding-left:20px;max-width:68ch}
+li{margin-bottom:5px}
+a{color:var(--accent)}
+strong{font-weight:600}
+em{font-style:italic}
+hr{border:0;border-top:1px solid var(--rule);margin:34px 0}
+
+/* ---------- code ---------- */
+.code{
+  position:relative;background:var(--sunk);border:1px solid var(--rule);
+  border-radius:3px;margin:0 0 14px;overflow:hidden;
+}
+.code pre{
+  margin:0;padding:13px 15px;overflow-x:auto;
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;line-height:1.7;
+}
+.code .cmt{color:var(--faint)}
+.copy{
+  position:absolute;top:7px;right:7px;
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.07em;
+  text-transform:uppercase;background:var(--surface);color:var(--muted);
+  border:1px solid var(--rule-strong);border-radius:2px;
+  padding:3px 8px;cursor:pointer;
+}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.copy:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+code{
+  font-family:"IBM Plex Mono",monospace;font-size:.88em;
+  background:var(--sunk);padding:1px 4px;border-radius:2px;
+}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto;margin:0 0 16px;border:1px solid var(--rule);border-radius:3px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{
+  text-align:left;padding:8px 13px;
+  border-bottom:1px solid var(--rule);vertical-align:top;
+}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--faint);
+  font-weight:500;background:var(--sunk);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td.n,th.n{
+  font-family:"IBM Plex Mono",monospace;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+tbody tr:hover{background:var(--sunk)}
+
+/* ---------- chips ---------- */
+.chip{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;
+  font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:2px;white-space:nowrap;font-weight:500;
+}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.no{background:var(--crit-soft);color:var(--crit)}
+.chip.mid{background:var(--warn-soft);color:var(--warn)}
+.chip.na{background:var(--sunk);color:var(--faint)}
+
+/* ---------- callout ---------- */
+.note{
+  border-left:3px solid var(--accent);background:var(--accent-soft);
+  padding:13px 16px;margin:0 0 16px;border-radius:0 3px 3px 0;
+}
+.note p:last-child{margin-bottom:0}
+.note .lbl{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+  display:block;margin-bottom:5px;font-weight:500;
+}
+
+/* ---------- ledger ---------- */
+.ledger{
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;
+  background:var(--sunk);border:1px solid var(--rule);border-radius:3px;
+  padding:14px 16px;margin:0 0 16px;overflow-x:auto;line-height:1.75;
+}
+.ledger .tot{
+  border-top:1px solid var(--rule-strong);
+  margin-top:7px;padding-top:7px;display:block;font-weight:600;
+}
+
+/* ---------- do/dont ---------- */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:620px){.cols{grid-template-columns:1fr}}
+.panel{border:1px solid var(--rule);border-radius:3px;padding:15px 16px;background:var(--surface)}
+.panel h3{margin-top:0}
+.panel ul{padding-left:17px;margin-bottom:0}
+.panel li{font-size:13.5px}
+
+footer{
+  border-top:1px solid var(--rule-strong);
+  margin-top:48px;padding-top:18px;
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faint);
+}
+
+/* ---------- print / save-as-PDF ---------- */
+@media print{
+  /* Force the light palette: a dark ground wastes ink and prints muddy. */
+  :root,:root[data-theme="dark"]{
+    color-scheme:light;
+    --paper:#fff;--surface:#fff;--sunk:#F4F2EE;
+    --ink:#000;--muted:#333;--faint:#666;
+    --rule:#CCC;--rule-strong:#888;
+    --accent:#8A3616;--accent-soft:#F7EDE8;
+    --ok:#1F5537;--ok-soft:#EDF4EF;
+    --warn:#6B4B0C;--warn-soft:#F8F2E2;
+    --crit:#8A211E;--crit-soft:#F9EAE8;
+  }
+  body{font-size:10pt;line-height:1.45;background:#fff}
+  .wrap{max-width:100%;padding:0}
+  .copy{display:none}
+  a{color:#000;text-decoration:none}
+  h1{font-size:24pt}
+  h2{font-size:14pt}
+  h3{font-size:11pt}
+  section{page-break-inside:auto;margin-bottom:22px}
+  h2,h3{page-break-after:avoid}
+  tr,.cell,.note,.ledger,.panel,.alert,.code{page-break-inside:avoid}
+  thead{display:table-header-group}
+  .scroll{overflow:visible}
+  .status{grid-template-columns:repeat(4,1fr)}
+  .cols{grid-template-columns:1fr 1fr}
+  tbody tr:hover{background:transparent}
+  footer{page-break-before:avoid}
+  @page{margin:16mm 14mm}
+}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Smart India Hackathon 2026 &middot; PS13</p>
+  <h1>BhoomiSetu</h1>
+  <p class="sub">Automated integration and intelligent harmonization of multi-source
+  geospatial data for urban land record management. Device handoff &mdash; everything
+  needed to resume on another machine.</p>
+  <p class="stamp">27 SEP 2026 &middot; 47 FILES &middot; GIT 2.7 MB &middot; COMMIT ca532b7</p>
+</header>
+
+<div class="alert">
+  <h2>Blocker</h2>
+  <p><strong>Windows Smart App Control flipped to enforced around 26 Sep.</strong> It
+  blocks numpy, scipy, shapely, pandas and xgboost at every version tested. Nothing
+  numeric has executed since &mdash; including the old virtual environment that worked
+  on the 23rd.</p>
+  <p>First thing on the new machine: check whether SAC is enforced there too. If it
+  isn't, everything just works and the WSL detour is unnecessary.</p>
+</div>
+
+<div class="status">
+  <div class="cell"><span class="k">Engine</span><span class="v">3,636</span></div>
+  <div class="cell"><span class="k">Verified 23 Sep</span><span class="v good">Pass</span></div>
+  <div class="cell"><span class="k">Verified since</span><span class="v bad">0%</span></div>
+  <div class="cell"><span class="k">Backend done</span><span class="v mid">~40%</span></div>
+  <div class="cell"><span class="k">API</span><span class="v bad">None</span></div>
+  <div class="cell"><span class="k">Frontend</span><span class="v bad">None</span></div>
+  <div class="cell"><span class="k">Real data</span><span class="v good">11 MB</span></div>
+  <div class="cell"><span class="k">USP module</span><span class="v bad">Never run</span></div>
+</div>
+
+<section>
+  <h2><span class="num">01</span>Moving the project</h2>
+  <p class="lede">Everything is committed to a local git repo. The move is a clone,
+  not a copy.</p>
+
+  <h3>On this machine</h3>
+  <div class="code"><button class="copy" type="button">Copy</button><pre>cd C:\Users\nairb\SIH\novax_13
+gh repo create bhoomisetu --private --source=. --push</pre></div>
+
+  <h3>On the new machine</h3>
+  <div class="code"><button class="copy" type="button">Copy</button><pre>git clone https://github.com/&lt;you&gt;/bhoomisetu.git
+cd bhoomisetu</pre></div>
+
+  <p>If you'd rather copy the folder directly, delete <code>.venv/</code> first &mdash;
+  it's Windows-specific and useless elsewhere.</p>
+
+  <p><strong>Not in the repo:</strong> <code>data/raw/_cache/</code>, 98 MB of raw
+  Microsoft tiles. Excluded deliberately; they re-download with resume via
+  <code>scripts/fetch_data.py</code>. The clipped GeoJSON derived from them
+  <em>is</em> committed, so you can work without ever re-fetching.</p>
+</section>
+
+<section>
+  <h2><span class="num">02</span>First step on the new device</h2>
+  <div class="code"><button class="copy" type="button">Copy</button><pre>Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\CI\Policy' |
+  Select-Object VerifiedAndReputablePolicyState</pre></div>
+
+  <div class="scroll"><table>
+    <thead><tr><th class="n">Value</th><th>Meaning</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td class="n">0</td><td>SAC off</td><td><span class="chip ok">Native works</span> Skip WSL entirely</td></tr>
+      <tr><td class="n">2</td><td>Evaluation</td><td><span class="chip mid">Partial</span> Watch for auto-promotion to 1</td></tr>
+      <tr><td class="n">1</td><td>Enforced</td><td><span class="chip no">Stack dead</span> Use WSL2</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>If 0 or 2 &mdash; native</h3>
+  <div class="code"><button class="copy" type="button">Copy</button><pre>python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+set PYTHONPATH=backend
+.venv\Scripts\python.exe scripts\verify_all.py</pre></div>
+
+  <h3>If 1 &mdash; WSL2</h3>
+  <div class="code"><button class="copy" type="button">Copy</button><pre><span class="cmt"># admin PowerShell</span>
+wsl --install -d Ubuntu-24.04
+
+<span class="cmt"># then inside Ubuntu</span>
+cp -r /mnt/c/&lt;path&gt;/bhoomisetu ~/bhoomisetu &amp;&amp; rm -rf ~/bhoomisetu/.venv
+cd ~/bhoomisetu &amp;&amp; bash setup_wsl.sh</pre></div>
+
+  <p>Ubuntu asks for a UNIX username and password. <strong>The password is invisible
+  while you type it</strong> &mdash; that's normal, not a broken terminal.</p>
+
+  <p>Keep the project on the Linux filesystem (<code>~</code>), not <code>/mnt/c</code>.
+  Cross-filesystem I/O in WSL is roughly 10&times; slower and we parse 80 MB tiles.</p>
+</section>
+
+<section>
+  <h2><span class="num">03</span>The environment problem</h2>
+  <p class="lede">SAC is reputation-based code integrity. It was in evaluation mode on
+  23 Sep and auto-promoted itself to enforced by the 26th. Once enforced, turning it
+  off is irreversible without reinstalling Windows.</p>
+
+  <p>Blocking is per-binary and effectively arbitrary &mdash; not "newer is safer":</p>
+
+  <div class="scroll"><table>
+    <thead><tr><th>Package</th><th>23 Sep</th><th>26 Sep</th></tr></thead>
+    <tbody>
+      <tr><td class="n">numpy 2.4.6</td><td><span class="chip ok">ok</span></td><td><span class="chip no">blocked</span></td></tr>
+      <tr><td class="n">numpy 2.0.2</td><td><span class="chip no">blocked</span></td><td><span class="chip no">blocked</span></td></tr>
+      <tr><td class="n">scipy 1.17.1</td><td><span class="chip ok">ok</span></td><td><span class="chip no">blocked</span></td></tr>
+      <tr><td class="n">shapely 2.1.2</td><td><span class="chip ok">ok</span></td><td><span class="chip no">blocked</span></td></tr>
+      <tr><td class="n">pandas 2.3.3</td><td><span class="chip ok">ok</span></td><td><span class="chip no">blocked</span></td></tr>
+      <tr><td class="n">xgboost 3.2.0</td><td><span class="chip ok">ok</span></td><td><span class="chip no">blocked</span></td></tr>
+      <tr><td class="n">pyproj <span style="color:var(--faint)">(5 versions)</span></td><td><span class="chip no">blocked</span></td><td><span class="chip no">blocked</span></td></tr>
+      <tr><td class="n">scikit-learn <span style="color:var(--faint)">(4 versions)</span></td><td><span class="chip no">blocked</span></td><td><span class="chip no">blocked</span></td></tr>
+      <tr><td class="n">lightgbm</td><td><span class="chip no">blocked</span></td><td><span class="chip no">blocked</span></td></tr>
+      <tr><td class="n">requests</td><td><span class="chip ok">ok</span></td><td><span class="chip ok">ok</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note">
+    <span class="lbl">Why WSL beats disabling SAC</span>
+    <p>SAC never allowed pyproj, rasterio, geopandas or scikit-learn even in evaluation
+    mode. WSL restores all of them, installs Node (never installed on the old machine,
+    so the frontend cannot start without it), and leaves the Windows side protected.</p>
+  </div>
+
+  <h3>This shaped the architecture, and it's a pitch asset</h3>
+  <p>Because pyproj, sklearn and lightgbm were unavailable, these are hand-written:
+  the CRS engine (UTM + Everest 1830 Helmert, from Snyder USGS PP 1395), the
+  classification and calibration metrics (ROC AUC, average precision, Brier, ECE,
+  reliability curve), and the fuzzy string matching with Indian transliteration
+  folding. Isotonic calibration uses <code>scipy.optimize</code>; assignment uses
+  <code>linear_sum_assignment</code>.</p>
+  <p>"We implemented the CRS engine and probability calibration from first principles"
+  beats "we imported pyproj". And <code>verify_all.py</code> now cross-validates our
+  UTM against pyproj, which is available in WSL &mdash; if they agree to
+  sub-millimetre, it stops being a workaround and becomes a verified implementation.</p>
+</section>
+
+<section>
+  <h2><span class="num">04</span>What the project is</h2>
+  <p class="lede">Ten datasets describe the same ground and none agree. Decide that
+  this AI-detected polygon, this old cadastral parcel and this revenue record are the
+  same property, then emit one clean, topologically valid layer with an honest
+  confidence on every decision so humans review only the uncertain ones.</p>
+  <p><strong>Spatial entity resolution for land. Triage, not full automation.</strong></p>
+
+  <h3>The USP &mdash; optimal survey targeting</h3>
+  <p>The PS enumerates ten sources and seven components. It is a spec; everyone builds
+  to it. <strong>You cannot differentiate on the spec.</strong></p>
+  <p>NAKSHA's own progress review (<em>Frontiers in Sustainable Cities</em> 2026,
+  first-authored by Kunal Satyarthi, Joint Secretary DoLR) reports ground truthing is
+  "the biggest lagging component", 55 of ~150 ULBs below 60%. The real bottleneck is
+  that ground truth is scarce and expensive.</p>
+
+  <div class="note">
+    <span class="lbl">The question nobody else answers</span>
+    <p>Given a fixed survey budget, which 40 parcels do you send a surveyor to, to
+    maximally reduce uncertainty across the whole city?</p>
+  </div>
+
+  <p>Model the residual displacement field as a Gaussian process. A GNSS point becomes
+  a thin-plate-spline control point reducing uncertainty across a neighbourhood.
+  Selecting the best K is submodular maximisation; greedy gives (1&nbsp;&minus;&nbsp;1/e)
+  &mdash; Krause, Singh &amp; Guestrin, JMLR 2008.</p>
+  <p>Not claimable without building it. Verifiable in 60 seconds. Three layers deep to copy.</p>
+  <p><strong>Two earlier USP candidates were rejected as too easy to claim:</strong>
+  "adjudication-grade harmonization" (an adjective) and "n-source fusion" (everyone's
+  diagram has ten boxes). Don't revive them as headlines.</p>
+</section>
+
+<section>
+  <h2><span class="num">05</span>File inventory</h2>
+
+  <div class="scroll"><table>
+    <thead><tr><th>Module</th><th class="n">LOC</th><th>What it does</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><td class="n">crs.py</td><td class="n">231</td><td>UTM + Everest 1830, from Snyder</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">geometry.py</td><td class="n">170</td><td>Shape descriptors</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">layers.py</td><td class="n">154</td><td>Feature / Layer / Provenance</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">synth/generator.py</td><td class="n">306</td><td>Synthetic Indian urban cadastre</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">synth/corruption.py</td><td class="n">464</td><td>11-stage damage harness + key</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">georef/transform.py</td><td class="n">254</td><td>Similarity / Affine / Poly / TPS</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">georef/coarse.py</td><td class="n">186</td><td>Hough vote + robust similarity</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">matching/features.py</td><td class="n">230</td><td>Blocking + 29 pairwise features</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">matching/model.py</td><td class="n">200</td><td>XGBoost + isotonic + SHAP</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">matching/assign.py</td><td class="n">250</td><td>Split/merge + Hungarian</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">topology/cleaner.py</td><td class="n">384</td><td>Snap / overlap / gap repair</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">attributes/text.py</td><td class="n">191</td><td>Jaro-Winkler, transliteration</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">evaluation/metrics.py</td><td class="n">148</td><td>ROC / AP / Brier / ECE</td><td><span class="chip ok">23 Sep</span></td></tr>
+      <tr><td class="n">targeting/uncertainty.py</td><td class="n">188</td><td>GP residual field</td><td><span class="chip no">never run</span></td></tr>
+      <tr><td class="n">targeting/planner.py</td><td class="n">275</td><td>Greedy submodular selection</td><td><span class="chip no">never run</span></td></tr>
+      <tr><td class="n">change/</td><td class="n">0</td><td>Change detection, encroachment</td><td><span class="chip na">empty stub</span></td></tr>
+      <tr><td class="n">conflict/</td><td class="n">0</td><td>Conflict resolution</td><td><span class="chip na">empty stub</span></td></tr>
+      <tr><td class="n">scripts/verify_all.py</td><td class="n">&mdash;</td><td>8 stages, ~25 assertions</td><td><span class="chip no">never run</span></td></tr>
+      <tr><td class="n">scripts/fetch_data.py</td><td class="n">&mdash;</td><td>MS + OSM fetch, resumable</td><td><span class="chip ok">works</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <p><strong>Not built:</strong> API (no <code>api/</code> at all &mdash;
+  <code>setup_wsl.sh</code> references <code>api.main:app</code>, which does not exist;
+  known bug, fixed by Phase 3.1), schema auto-matching, conflict resolution, change
+  detection, real-data ingest, block-derived cadastre, export, ULPIN, frontend.</p>
+</section>
+
+<section>
+  <h2><span class="num">06</span>Measured numbers</h2>
+  <p class="lede">From the old machine, 23 Sep. Re-verify after the environment is fixed.</p>
+
+  <div class="scroll"><table>
+    <thead><tr><th>Metric</th><th class="n">Value</th></tr></thead>
+    <tbody>
+      <tr><td>Pairwise F1 / ROC AUC</td><td class="n">0.961 / 0.986</td></tr>
+      <tr><td>Expected Calibration Error</td><td class="n">0.0034</td></tr>
+      <tr><td>Blocking recall</td><td class="n">1.000</td></tr>
+      <tr><td>Exact set match</td><td class="n">93.33%</td></tr>
+      <tr><td>Spurious parcels rejected</td><td class="n">57 / 57</td></tr>
+      <tr><td>Subdivision detection precision</td><td class="n">1.000 <span style="color:var(--faint)">(recall 0.227)</span></td></tr>
+      <tr><td>Topology errors</td><td class="n">6,199 &rarr; 238</td></tr>
+      <tr><td>Overlapping pairs</td><td class="n">5,038 &rarr; 1</td></tr>
+      <tr><td>Invalid geometries</td><td class="n">31 &rarr; 0</td></tr>
+      <tr><td>Training time</td><td class="n">1.1 s</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Area conservation ledger</h3>
+  <div class="ledger">
+    summed parcel area&nbsp;&nbsp; 422,219 m&sup2; &rarr; 410,028 m&sup2;&nbsp;&nbsp; (&minus;2.89%)<br>
+    union footprint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 404,586 m&sup2; &rarr; 409,955 m&sup2;&nbsp;&nbsp; (+1.33%)<br>
+    doubly-claimed land&nbsp;&nbsp; 17,632 m&sup2; &rarr;&nbsp;&nbsp;&nbsp;&nbsp; 72.7 m&sup2;
+    <span class="tot">removed double-counting &minus;17,560 m&sup2; &nbsp;&middot;&nbsp; recovered slivers +5,369 m&sup2; &nbsp;&middot;&nbsp; NO LAND LOST</span>
+  </div>
+  <p>The summed area falls <em>because</em> two people were recorded owning the same
+  ground; actual footprint goes up. This answers the revenue officer's first question.</p>
+
+  <h3>Principled restraint</h3>
+  <p>The cleaner preserved <strong>69 of 73</strong> deliberately deleted parcels
+  &mdash; it refused to fill parcel-sized holes and flagged them for survey instead.
+  Filling them would be silent data fabrication.</p>
+</section>
+
+<section>
+  <h2><span class="num">07</span>Findings that must not be lost</h2>
+
+  <h3>You cannot match parcels before georeferencing them</h3>
+  <p>Urban plots are ~11 m across; legacy misregistration is 5&ndash;15 m, so an
+  unaligned parcel overlaps its <em>neighbour</em> more than its own counterpart.
+  Blocking recall was <strong>0.58</strong> &mdash; 42% of true matches never reached
+  the model. Coarse alignment first takes it to <strong>1.00</strong>.
+  <strong>Never reorder the pipeline.</strong></p>
+
+  <h3>The leakage trap</h3>
+  <p>The first trained model scored <strong>F1 0.9955 and was worthless</strong>.
+  Feature importance showed it had learned to join on khasra number and owner name
+  (96% of the decision), with <code>iou</code> at 0.24%. If identifiers matched
+  reliably, this problem statement would not exist.</p>
+  <p>Fixed by making the damage honest: 45% of blocks get renumbered (real resurveys
+  do this) and 12% of owners genuinely change. The model is now <strong>88%
+  geometric</strong>, and <code>verify_all.py</code> asserts
+  <code>geometry_share &gt;= 0.70</code> so it can never silently regress.</p>
+
+  <h3>Split detection: precision over F1</h3>
+  <p>Best F1 was 0.398 at containment 0.40. Chose containment 0.50 instead &mdash;
+  precision <strong>1.000</strong>, recall 0.227, and the best overall exact match.
+  Falsely claiming a subdivision is a legal problem; missing one routes to human
+  review, which is where uncertain cases belong. Say this out loud; it shows domain
+  understanding.</p>
+
+  <h3>Mutation records were deliberately dropped</h3>
+  <p>Generating a legal mutation record invites three questions you can't answer:
+  which state's format, whether you're bypassing the statutory notice and hearing, and
+  whether it's revenue or municipal (in urban Karnataka "khata" is a property-tax
+  account, not a revenue holding). Emit a <strong>change dossier flagged for the
+  revenue officer</strong> instead. Answer to "who signs this?" &mdash; the officer
+  does; we built the file.</p>
+</section>
+
+<section>
+  <h2><span class="num">08</span>Real data on disk</h2>
+
+  <div class="scroll"><table>
+    <thead><tr><th>AOI</th><th class="n">MS AI footprints</th><th class="n">OSM buildings</th><th class="n">OSM roads</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Chandausi</strong> <span style="color:var(--faint)">78.7749 E, 28.4515 N</span></td><td class="n">5,488</td><td class="n">6</td><td class="n">1,713</td></tr>
+      <tr><td><strong>Pune</strong> <span style="color:var(--faint)">73.8553 E, 18.5308 N</span></td><td class="n">8,527</td><td class="n">8,171</td><td class="n">3,133</td></tr>
+    </tbody>
+  </table></div>
+
+  <p><strong>Chandausi: 915 : 1.</strong> The NAKSHA pilot town has a mapped road
+  network and essentially no municipal building data, while AI extraction yields
+  thousands of footprints. That gap <em>is</em> the problem statement &mdash; not a
+  data limitation.</p>
+
+  <p><strong>Pune: 8,527 vs 8,171, but median area 179.6 m&sup2; vs 154.2 m&sup2;</strong>
+  &mdash; a systematic 16% disagreement over identical ground. Real, uncurated,
+  unstaged conflict.</p>
+
+  <h3>Gotchas</h3>
+  <ul>
+    <li><strong>MS <code>confidence</code> is tile-dependent</strong> &mdash; present
+    for 100% of Chandausi (min 0.556, median 0.965), 0% of Pune (all &minus;1.0).
+    Provenance must fall back to a source-level prior.</li>
+    <li><code>height</code> is &minus;1.0 in both tiles, so DSM must come from
+    Copernicus GLO-30.</li>
+    <li><strong>Unfixed bug:</strong> Overpass <code>out geom</code> returns whole
+    ways, so <code>chandausi_osm_roads.geojson</code> spans 0.42&deg; instead of the
+    0.036&deg; AOI (322.6 km of road trailing toward Moradabad). Harmless for display,
+    <strong>fatal for block-derived cadastre</strong>. Clip to AOI first.</li>
+    <li>Overpass main instance throws 504/429 constantly; <code>fetch_data.py</code>
+    rotates four mirrors. <code>overpass.kumi.systems</code> is most reliable.</li>
+    <li>Real MS median footprint <strong>143.0 m&sup2;</strong> vs our synthetic
+    generator's <strong>133.8 m&sup2;</strong> &mdash; independent agreement within 7%,
+    which defends the synthetic plot sizes.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="num">09</span>Next step &mdash; the gate</h2>
+  <p class="lede">After the environment is fixed, run the verifier. Stage 8 is the
+  go/no-go on the entire USP.</p>
+
+  <div class="code"><button class="copy" type="button">Copy</button><pre>PYTHONPATH=backend python scripts/verify_all.py</pre></div>
+
+  <div class="ledger">
+    before any new control&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X.XXX<br>
+    PREDICTED after 40 points&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X.XXX<br>
+    ACHIEVED after 40 points&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X.XXX<br>
+    ACHIEVED with 40 RANDOM points&nbsp; X.XXX
+  </div>
+
+  <p><strong>If optimised placement does not beat random, the USP is theatre.</strong>
+  Plan B: fall back to the measurement apparatus &mdash; calibration, the area ledger,
+  principled restraint &mdash; as the primary differentiator. Weaker and more
+  copyable, but honest.</p>
+
+  <p>Then Phases 2&ndash;8 per <code>PLAN.md</code>: backend completion, API, frontend,
+  map, screens, security, demo. <strong>18&ndash;24 sessions full, 12&ndash;15
+  compressed.</strong></p>
+</section>
+
+<section>
+  <h2><span class="num">10</span>Research</h2>
+
+  <div class="cols">
+    <div class="panel">
+      <h3 style="color:var(--ok)">Verified &mdash; use these</h3>
+      <ul>
+        <li><strong>SoI circular T-260/1147</strong> (10 Feb 2025): ORI 5 cm GSD,
+        RMSE(x,y) &le; 10 cm; DSM/DTM RMSE(z) &le; 15 cm; CORS &lt; 5 cm.
+        <strong>CRS: UTM on WGS84.</strong></li>
+        <li><strong>NAKSHA</strong>: 152 ULBs, 26 states + 3 UTs, &#8377;194 crore,
+        4,142.63 sq km, scaling to 4,912 ULBs. Ministry = Rural Development / DoLR,
+        not MoHUA.</li>
+        <li><strong>DILRMP</strong>: only 49.10% of villages have geo-referenced
+        cadastral maps.</li>
+        <li><strong>Sengupta et al., Survey Review 2016</strong>: modal 3&ndash;4 m
+        RMSE across 310 real West Bengal sheets &rarr; 30&ndash;40&times; mismatch vs
+        NAKSHA's 10 cm.</li>
+        <li><strong>&#8377;56,725/sq km</strong> &mdash; Tamil Nadu's official resurvey
+        rate to DoLR.</li>
+        <li><strong>Bhu-Naksha manual</strong> documents a manually entered per-state
+        magic scale factor on shapefile import: UP &times;4000, Himachal &times;22.</li>
+        <li><strong>Closest prior art</strong>: Suwardhi et al., ISPRS 2025 &mdash;
+        single-source, no schema/CRS/tenure handling, no survey planning.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3 style="color:var(--crit)">Do not say</h3>
+      <ul>
+        <li><strong>"Indian Geodetic Datum 2023"</strong> does not exist &mdash; a
+        summariser invented it. NGP 2022 only commits to <em>redefining</em> the
+        framework. Indian Vertical Datum is real.</li>
+        <li>NAKSHA uses Everest 1830. <strong>It uses UTM on WGS84.</strong> We
+        implement Everest only for legacy sheets predating the switch.</li>
+        <li>Any man-hour or cost figure for manual GIS <em>integration</em> &mdash;
+        <strong>no published figure exists.</strong></li>
+        <li>A ULPIN encoding spec &mdash; <strong>not published.</strong> Implement a
+        faithful shape and say so.</li>
+        <li>ULB count conflicts three ways (152 / 157 / 150). <strong>Use 152.</strong></li>
+        <li>NUIS is two different things: National Urban Information <em>System</em>
+        (MoUD 2006) vs National Urban Innovation <em>Stack</em> (MoHUA). NAKSHA MAP-1
+        publishes at 1:500, finer than any NUIS tier.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:18px">
+    <span class="lbl">Worth chasing</span>
+    <p>The NAKSHA SDMS schema SOP is a 105-page scan with no text layer &mdash; 105
+    pages yielded 105 characters. OCR'ing it is the highest-value remaining unknown;
+    conforming output to the actual government schema would be a real differentiator.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">11</span>Resuming with Claude</h2>
+  <p>Open Claude Code in the project root and paste:</p>
+  <div class="code"><button class="copy" type="button">Copy</button><pre>Read HANDOFF.md, PLAN.md and BUILD_PROMPT.md. We're on a new machine.
+Check Smart App Control state, get the environment working, then run
+scripts/verify_all.py and report stage 8.</pre></div>
+  <p>That is enough context to pick up exactly here.</p>
+</section>
+
+<footer>
+  BHOOMISETU &middot; SIH 2026 PS13 &middot; HANDOFF 27 SEP 2026<br>
+  FULL SOURCE IN HANDOFF.MD &middot; PLAN IN PLAN.MD &middot; BRIEF IN BUILD_PROMPT.MD
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll(".copy").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    var pre = btn.parentElement.querySelector("pre");
+    var text = pre.innerText;
+    var done = function () {
+      btn.textContent = "Copied";
+      setTimeout(function () { btn.textContent = "Copy"; }, 1600);
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { select(pre, btn); });
+      } else {
+        select(pre, btn);
+      }
+    } catch (e) {
+      select(pre, btn);
+    }
+  });
+});
+function select(pre, btn) {
+  try {
+    var r = document.createRange();
+    r.selectNodeContents(pre);
+    var s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+    btn.textContent = "Selected";
+    setTimeout(function () { btn.textContent = "Copy"; }, 1600);
+  } catch (e) { /* nothing more we can do */ }
+}
+</script>
