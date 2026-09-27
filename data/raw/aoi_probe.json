@@ -1,0 +1,28 @@
+{
+ "Chandausi, Sambhal, UP (NAKSHA pilot)": {
+  "lon": 78.7749,
+  "lat": 28.4515,
+  "bbox": [
+   78.7569,
+   28.4335,
+   78.7929,
+   28.4695
+  ],
+  "buildings": 6,
+  "highways": 1713,
+  "verdict": "TOO SPARSE"
+ },
+ "Pune (Shivajinagar)": {
+  "lon": 73.8553,
+  "lat": 18.5308,
+  "bbox": [
+   73.8373,
+   18.5128,
+   73.8733,
+   18.5488
+  ],
+  "buildings": 8230,
+  "highways": 3133,
+  "verdict": "EXCELLENT"
+ }
+}

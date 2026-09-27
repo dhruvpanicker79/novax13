@@ -1,0 +1,21 @@
+# Virtual environments
+.venv/
+.venv-linux/
+__pycache__/
+*.pyc
+
+# Large re-downloadable source tiles (98 MB). scripts/fetch_data.py resumes
+# these automatically; the clipped GeoJSON derived from them IS committed.
+data/raw/_cache/
+
+# Pipeline outputs
+data/out/
+
+# Node
+node_modules/
+dist/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
