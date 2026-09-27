@@ -287,6 +287,59 @@ accuracy), modulated by recency and legal authority. Hard rules override:
 per-attribute, not per-source. Every resolution writes an audit entry naming the
 rule that fired.
 
+### Conflict taxonomy — explicit thresholds, no hand-waving
+
+Every candidate pair lands in exactly one class. `p` is the **calibrated**
+match probability, not a weighted score.
+
+| Class | Condition | Routing |
+|---|---|---|
+| `confirmed` | `p ≥ 0.95` and centroid residual `≤ 0.50 m` and IoU `≥ 0.80` | auto-accept |
+| `positional_conflict` | `p ≥ 0.95` but residual `> 0.50 m` | auto-correct, log, flag if `> 2.0 m` |
+| `attribute_conflict` | geometry agrees, attributes disagree on an authoritative field | resolve by per-attribute authority; **owner mismatch always → human** |
+| `subdivision` | ≥ 2 sources each `≥ 0.70` contained in one reference, joint coverage `≥ 0.55` | auto, precision-tuned |
+| `amalgamation` | mirror of the above | auto, precision-tuned |
+| `missing_reference` | source parcel, no candidate `p ≥ 0.10` | flag as new or spurious |
+| `missing_source` | reference parcel unmatched | **flag for field survey — never fabricate** |
+| `unresolved` | any M:N that is not a clean subdivision/amalgamation | **straight to human** |
+
+**Default to 1:1. Any many-to-many candidate that does not pass the
+containment + coverage test goes to a human rather than being auto-resolved.**
+Guessing at a tangled boundary is how a system loses an administrator's trust
+permanently.
+
+Thresholds live in one config object, are surfaced in the UI, and are
+**tuned on the held-out city, never on the demo city.**
+
+### Worked confidence example
+
+Not a weighted sum. The matcher outputs a margin; isotonic calibration maps it
+to a frequency; provenance adjusts for source quality.
+
+```
+Parcel L02291  ->  reference P01847
+
+  matcher raw margin                    3.81
+  sigmoid                               0.9782
+  isotonic calibration (held-out fit)   0.9613   <- P(correct match)
+
+  provenance adjustment
+    legacy sheet   sigma 6.0 m, 1987, authoritative for ownership
+    MS footprint   sigma 1.2 m, 2024, no ownership authority
+    inverse-variance weight  ->  reference geometry dominates 25:1
+
+  positional residual after TPS         0.28 m
+  post-correction uncertainty (GP)      0.31 m
+
+  FINAL       p = 0.961   sigma = 0.31 m   class = confirmed
+  DISPOSITION auto-accept (threshold 0.95); no human review
+```
+
+What makes `0.961` meaningful: of all pairs the model scored near 0.96,
+**96.1% were actually correct on held-out data** — and the reliability curve in
+the Validate tab shows it. That sentence is the whole difference between this
+and a weighted score.
+
 ---
 
 ## 5. THE TARGETING MODULE — implement this properly
@@ -395,7 +448,6 @@ Layout  8px grid · 1px hairline borders #E3E6EA · radius ≤ 4px
 Chrome  persistent status bar: live lat/lon · CRS (EPSG:32644) · scale bar ·
         zoom · selected count · pipeline stage
         resizable docked panels (react-resizable-panels), not floating modals
-        keyboard shortcuts: 1–9 layers, Space run, / search, ? help
 ```
 
 ### Layout — three-pane IDE, not a dashboard
@@ -414,6 +466,108 @@ Chrome  persistent status bar: live lat/lon · CRS (EPSG:32644) · scale bar ·
 │ virtualised grid, sortable, filterable, CSV export           │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+Three-pane, because this is a **workbench, not a dashboard**. A dashboard is
+read; a workbench is operated. The map never gets covered — panels dock and
+resize, nothing floats over the data. **No modal ever appears over the map.**
+
+### Interaction — where "good" actually separates from "AI-generated"
+
+Visual tokens get you to competent. These get you to convincing.
+
+**Keyboard-first.** A GIS operator's hands stay on the keyboard.
+```
+1–9      toggle layer n            ⌘K / Ctrl-K   command palette
+Space    run / pause pipeline      /             search parcels by khasra
+[ ]      prev / next conflict      Enter         accept highlighted suggestion
+E        escalate to review        ⌘Z            undo (everything is undoable)
+F        zoom to selection         \             toggle swipe compare
+?        shortcut overlay          Esc           clear selection
+```
+The **command palette is the single highest-leverage element** — it makes the
+app feel like a tool rather than a demo, and it costs an afternoon.
+
+**Selection is a first-class state.** Clicking a parcel changes the inspector,
+highlights its match on the other layer, draws the linkage arc, filters the
+conflict grid, and updates the status bar count — all at once, all under 16 ms.
+Selection survives layer toggles, pipeline re-runs and panel resizes.
+
+**Optimistic UI.** Accepting a conflict updates the map **immediately** and
+reconciles with the server after. Never make a reviewer wait on a round trip to
+see their own decision. Roll back visibly if the server disagrees.
+
+**Undo everything, with a visible stack.** A reviewer who fears a misclick
+reviews slowly. ⌘Z unwinds accept/reject/geometry edits. The audit log is the
+undo stack, rendered.
+
+**Progressive disclosure in the evidence panel.** Default view: the decision and
+its confidence. One click: the top-5 SHAP contributions. Another: all 29
+features with their values. A judge asking "why did it match these?" should get
+a deeper answer at every click, not a wall of numbers up front.
+
+**Hover reveals information, never just colour.** Hovering a parcel shows khasra
++ area + confidence in a cursor-following readout. Hovering a survey point shows
+its marginal gain and predicted RMSE delta. Hovering a conflict row highlights
+it on the map without changing selection.
+
+**Numbers never jump.** `font-variant-numeric: tabular-nums` everywhere, and
+animate counters with `requestAnimationFrame` easing during the pipeline run so
+figures settle instead of flickering.
+
+### Motion — one orchestrated moment, not five effects
+
+| Element | Duration | Easing | Why |
+|---|---|---|---|
+| **Alignment animation** | 1600 ms | `cubic-bezier(.22,1,.36,1)` | the signature moment; slow enough to *read* |
+| Panel resize | 0 ms | — | must feel physical, never animated |
+| Selection highlight | 120 ms | `ease-out` | acknowledgement, not decoration |
+| Conflict pulse | 2400 ms loop | `ease-in-out` | ambient, very low amplitude |
+| Stage transition | 240 ms | `ease-out` | progress feels continuous |
+| Counter settle | 600 ms | `ease-out` | numbers arrive, don't flicker |
+
+Everything else is instant. **Honour `prefers-reduced-motion`** — the alignment
+animation becomes a cross-fade; nothing else moves.
+
+### The states everyone forgets
+
+These are where prototypes look unfinished, and judges notice:
+
+- **Empty** — no AOI loaded: show the two presets with coverage stats, not a
+  blank map with "Select a project."
+- **Loading** — skeleton rows matching the real grid layout, never a spinner
+  over the map. The map stays interactive during pipeline runs.
+- **Long-running** — the pipeline takes minutes. Per-stage progress with elapsed
+  time, a partial result on the map as each stage lands, and a working cancel.
+- **Error** — "Overpass returned 504 — retrying mirror 2 of 4" is a real message.
+  "Something went wrong" is not.
+- **Zero results** — filtering conflicts to none shows *which* filter emptied it
+  and a one-click clear.
+- **Degraded** — MS `confidence` is absent for Pune. The UI must say
+  "source-level prior (no per-feature confidence in this tile)" rather than
+  silently showing a number that isn't real.
+
+### Density and restraint
+
+Base 13px, 28px rows, 8px grid. Target **information density close to QGIS's
+attribute table** — an operator should see 25+ parcels without scrolling.
+
+**One accent colour only.** Semantic colours (accept/review/conflict) are not
+accents and must never be used decoratively. If everything is coloured, the red
+parcel stops meaning anything.
+
+**Borders, not shadows.** A 1px hairline separates; a drop shadow says
+"template." The only permitted elevation is the command palette.
+
+**Right-align every number. Left-align every label.** Non-negotiable in tables —
+it is the fastest single tell of software written by someone who reads data.
+
+### Accessibility — cheap, and it shows care
+
+Focus rings on every interactive element (never `outline: none`). Full keyboard
+traversal of the conflict queue. ARIA live region announcing pipeline stage
+changes. **Confidence encoded by more than hue** — the choropleth pairs colour
+with a hatch pattern at low confidence, so it survives both projector washout
+and colour-blind viewers. That last one is a genuine risk in a demo room.
 
 ---
 
@@ -579,7 +733,31 @@ No mocks, no hardcoded results:
 
 ---
 
-## 14. VERIFIED FACTS FOR THE PITCH
+## 14. WHERE THIS WILL NOT WORK — say it before a judge finds it
+
+Naming your own failure modes is the strongest credibility move available, and
+every one of these will occur to a cadastral officer within the first minute.
+Each needs a fallback, not a denial.
+
+| Failure mode | Why | Fallback |
+|---|---|---|
+| **Dense informal settlements** | Roofs touch; no visible plot boundary exists on the ground. AI footprints merge whole blocks into one polygon. | Detect via footprint density + compactness collapse; mark the area `not_automatable` and exclude from auto-accept entirely. Do not report a confidence — report *unsurveyable by imagery*. |
+| **Degraded scanned cadastral sheets** | Torn, faded, hand-annotated. Vectorisation is unreliable before georeferencing even starts. | Human vectorisation stays upstream. We consume vectors, not scans. State this scope boundary explicitly. |
+| **Multi-storey / vertical tenure** | Flats stack ownership in 3D. A 2-D cadastre cannot represent four owners of one footprint. | Detect via DSM height + parcel-to-footprint cardinality; flag `vertical_tenure` and exclude. Future scope: 3D cadastre (LADM / ISO 19152). |
+| **Tree-occluded parcels** | Canopy hides boundaries and roofs; DSM reads canopy, not building. | Mask from DSM–DTM anomaly; downweight rather than drop, and surface the reason. |
+| **Sparse ground control** | With few GNSS points the TPS extrapolates wildly outside their hull. | Refuse to rubber-sheet beyond the control hull — fall back to affine there. **This is exactly what the targeting module exists to fix.** |
+| **Genuinely ambiguous boundaries** | Some disputes are legal, not geometric. No amount of imagery resolves who owns a contested strip. | Route to human with both claims preserved. **Never auto-resolve a boundary under active dispute.** |
+| **Khasra renumbering with no crosswalk** | After a resurvey the identifier carries no information. | Geometry-only matching — which is why the model is 88% geometric by design. |
+
+**The honest framing:** the system is built to be *correct on what it attempts
+and explicit about what it declines*. Coverage is a tunable; trustworthiness is
+not. Put the `not_automatable` count on the dashboard next to the auto-accept
+count — a system that admits its own limits reads as engineering, and one that
+claims 100% coverage reads as a sales pitch.
+
+---
+
+## 15. VERIFIED FACTS FOR THE PITCH
 
 - **Survey of India circular T-260/1147 (10 Feb 2025)** — NAKSHA spec: ORI 5 cm
   GSD, RMSE(x,y) ≤ 10 cm; DSM/DTM RMSE(z) ≤ 15 cm; CORS < 5 cm. **CRS: UTM on
