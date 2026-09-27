@@ -19,3 +19,6 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+dist.new/
+frontend/node_modules/
+frontend/dist/
