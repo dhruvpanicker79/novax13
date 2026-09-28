@@ -1,4 +1,4 @@
-"""End-to-end verification of the BhoomiSetu engine.
+"""End-to-end verification of the KSHETRA engine.
 
 One command that proves every stage works and prints the numbers that go on
 the slides. Run after any environment change:
@@ -21,24 +21,24 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 
-from bhoomisetu.crs import epsg_for_utm, geodetic_to_utm, utm_to_geodetic
-from bhoomisetu.evaluation.metrics import (
+from kshetra.crs import epsg_for_utm, geodetic_to_utm, utm_to_geodetic
+from kshetra.evaluation.metrics import (
     classification_report, coverage_at_precision,
 )
-from bhoomisetu.georef.coarse import coarse_align
-from bhoomisetu.georef.transform import ThinPlateSpline
-from bhoomisetu.matching.assign import assign_matches
-from bhoomisetu.matching.features import (
+from kshetra.georef.coarse import coarse_align
+from kshetra.georef.transform import ThinPlateSpline
+from kshetra.matching.assign import assign_matches
+from kshetra.matching.features import (
     FieldMap, build_feature_matrix, generate_candidates,
 )
-from bhoomisetu.matching.model import ParcelMatcher
-from bhoomisetu.synth.corruption import (
+from kshetra.matching.model import ParcelMatcher
+from kshetra.synth.corruption import (
     SQM_PER_BIGHA, CorruptionConfig, corrupt_cadastre,
 )
-from bhoomisetu.synth.generator import CityConfig, generate_city
-from bhoomisetu.targeting.planner import SurveyPlanner
-from bhoomisetu.targeting.uncertainty import UncertaintyField
-from bhoomisetu.topology.cleaner import clean_layer, diagnose
+from kshetra.synth.generator import CityConfig, generate_city
+from kshetra.targeting.planner import SurveyPlanner
+from kshetra.targeting.uncertainty import UncertaintyField
+from kshetra.topology.cleaner import clean_layer, diagnose
 
 LEGACY_FIELDS = FieldMap(khasra="KHSRA_NUM", owner="KHATEDAR_NM",
                          area="AREA_BIGHA", land_use="LU_CODE", ward="WARD",

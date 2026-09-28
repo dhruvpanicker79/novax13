@@ -94,3 +94,71 @@ export const STAGES: { id: StageId; label: string }[] = [
   { id: "uncertainty", label: "Uncertainty" },
   { id: "targeting", label: "Targeting" },
 ];
+
+/* ---- schema auto-matching ---- */
+export interface SchemaField {
+  canonical: string;
+  column: string | null;
+  confidence: number;
+  evidence: string;
+  alternatives: [string, number][];
+}
+export interface SchemaResult {
+  columns: string[];
+  fields: SchemaField[];
+  area_unit: string | null;
+  area_scale: number;
+  area_unit_confidence: number;
+  area_unit_evidence: string;
+  unmapped: string[];
+}
+
+/* ---- change detection ---- */
+export interface ChangeEvent {
+  kind: "new" | "demolished" | "extended" | "reduced" | "heightened";
+  fid: string;
+  area_sqm: number;
+  delta_sqm: number;
+  confidence: number;
+  height_delta_m: number | null;
+  storeys_delta: number | null;
+  at: [number, number];
+  note: string;
+}
+export interface Encroachment {
+  building_fid: string;
+  govt_fid: string;
+  category: string;
+  sqm: number;
+  fraction: number;
+  severity: "minor" | "significant" | "severe";
+  confidence: number;
+  at: [number, number];
+}
+export interface ChangeResult {
+  epoch_from: string;
+  epoch_to: string;
+  dsm_available: boolean;
+  counts: Record<string, number>;
+  encroached_sqm: number;
+  events: ChangeEvent[];
+  encroachments: Encroachment[];
+  sample_dossier: Record<string, any> | null;
+}
+
+/* ---- conflict resolution ---- */
+export interface ResolutionCase {
+  fid: string;
+  title: string;
+  claims: {
+    source: string; label: string; field: string; value: any;
+    sigma_m: number; vintage: number; authority: string[];
+  }[];
+  resolutions: {
+    field: string; value: any; source: string; rule: string;
+    confidence: number; agreement: number; note: string;
+  }[];
+  transitive: string[];
+  needs_human: boolean;
+  reason: string;
+}

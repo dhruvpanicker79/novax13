@@ -1,4 +1,4 @@
-# BhoomiSetu — build plan, start to finish
+# KSHETRA — build plan, start to finish
 
 Written 26 Sep 2026. Tracks against the spec in `BUILD_PROMPT.md`.
 
@@ -33,11 +33,11 @@ wsl --install          # admin PowerShell, then reboot
 
 Then in Ubuntu:
 ```bash
-cd ~ && cp -r /mnt/c/Users/nairb/SIH/novax_13 bhoomisetu && cd bhoomisetu
+cd ~ && cp -r /mnt/c/Users/nairb/SIH/novax_13 kshetra && cd kshetra
 bash setup_wsl.sh
 ```
 
-Keep the project on the Linux filesystem (`~/bhoomisetu`), not `/mnt/c` — WSL
+Keep the project on the Linux filesystem (`~/kshetra`), not `/mnt/c` — WSL
 cross-filesystem I/O is ~10× slower and we parse 80 MB tiles.
 
 **Why WSL over disabling SAC:** it restores `pyproj`, `rasterio`, `geopandas`

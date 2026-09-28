@@ -9,7 +9,7 @@ Both are clipped to the AOI bbox and written as GeoJSON to data/raw/.
 import csv, gzip, io, json, math, os, sys, time
 import requests
 
-HEADERS = {"User-Agent": "BhoomiSetu/0.1 (SIH2026 cadastral research)"}
+HEADERS = {"User-Agent": "KSHETRA/0.1 (SIH2026 cadastral research)"}
 # The main Overpass instance is frequently overloaded; rotate through mirrors.
 OVERPASS_MIRRORS = [
     "https://overpass.kumi.systems/api/interpreter",

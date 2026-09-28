@@ -1,4 +1,4 @@
-# BUILD PROMPT — BhoomiSetu
+# BUILD PROMPT — KSHETRA
 
 **SIH 2026 · PS13 — Automated Integration and Intelligent Harmonization of
 Multi-source Geospatial Data for Urban Land Record Management**
@@ -208,7 +208,7 @@ Export     GeoJSON, Shapefile, OGC API – Features, PDF audit report
   `pip install -U`.
 
 **Do not rewrite the engine.** A working, measured implementation exists at
-`C:\Users\nairb\OneDrive\Desktop\sih13\bhoomisetu\` — CRS (UTM + Everest 1830
+`C:\Users\nairb\OneDrive\Desktop\sih13\kshetra\` — CRS (UTM + Everest 1830
 from Snyder), geometry descriptors, synthetic city generator, damage harness,
 coarse georeferencing, four transform models, matching features, XGBoost matcher
 with isotonic calibration, assignment with split/merge detection, topology

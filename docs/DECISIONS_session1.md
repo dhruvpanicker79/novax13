@@ -37,14 +37,14 @@ arbitrary** — not "newer is safer" or "older is safer":
 **Decision:** the engine depends only on `numpy`, `scipy`, `shapely`, `pandas`,
 `xgboost`. Everything blocked was replaced with hand-written code:
 
-- `pyproj` -> `bhoomisetu/crs.py`, UTM + Everest 1830 implemented from Snyder's
+- `pyproj` -> `kshetra/crs.py`, UTM + Everest 1830 implemented from Snyder's
   USGS manual. Verified: sub-millimetre round-trip, exact false-easting on the
   central meridian.
-- `scikit-learn` metrics -> `bhoomisetu/evaluation/metrics.py` (ROC AUC,
+- `scikit-learn` metrics -> `kshetra/evaluation/metrics.py` (ROC AUC,
   average precision, Brier, ECE, reliability curve).
 - `sklearn.isotonic` -> `scipy.optimize.isotonic_regression`.
 - `lightgbm` -> `xgboost` native Booster API (no sklearn wrapper).
-- `rapidfuzz` -> `bhoomisetu/attributes/text.py` (Jaro-Winkler, token-set).
+- `rapidfuzz` -> `kshetra/attributes/text.py` (Jaro-Winkler, token-set).
 
 **This turned out to be an advantage, not a workaround.** "We implemented the
 CRS engine and the calibration from first principles" is a much better answer to
@@ -69,7 +69,7 @@ FastAPI, no build step.
 ## 4. Demo data is synthetic, and deliberately so
 
 No dataset ships with the PS. Rather than depend on downloads at 3am, I wrote a
-generator (`bhoomisetu/synth/`) that builds a realistic Indian urban cadastre
+generator (`kshetra/synth/`) that builds a realistic Indian urban cadastre
 offline from a seed: irregular road grid, blocks recursively subdivided into
 plots, khasra numbering as `parent/child`, buildings with setbacks, government
 land, and recorded areas that drift from surveyed areas.
@@ -120,7 +120,7 @@ problem in a land record. Missing one just sends it to the human review queue,
 which is where the system is designed to send uncertain cases anyway. Say this
 out loud to judges — it shows you understand the domain, not just the metric.
 
-**To overrule:** one-line change in `bhoomisetu/matching/assign.py` defaults.
+**To overrule:** one-line change in `kshetra/matching/assign.py` defaults.
 
 ---
 

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type {
-  AuditEntry, Conflict, FC, Metrics, Residual, StageId, SurveyPlan,
-  UncertaintyGrid,
+  AuditEntry, ChangeResult, Conflict, FC, Metrics, Residual,
+  ResolutionCase, SchemaResult, StageId, SurveyPlan, UncertaintyGrid,
 } from "./types";
 import { STAGES } from "./types";
 
@@ -15,7 +15,8 @@ async function j<T>(name: string): Promise<T> {
 
 export type LayerId =
   | "reference" | "legacy" | "aligned" | "harmonized" | "govt"
-  | "residuals" | "confidence" | "conflicts" | "survey" | "uncertainty";
+  | "residuals" | "confidence" | "conflicts" | "survey" | "uncertainty"
+  | "buildings" | "change" | "encroach";
 
 export interface LayerState {
   id: LayerId; label: string; sub: string;
@@ -31,6 +32,9 @@ const DEFAULT_LAYERS: LayerState[] = [
   { id: "uncertainty", label: "Uncertainty field", sub: "GP posterior σ", on: false, opacity: 0.7 },
   { id: "survey", label: "Survey plan", sub: "recommended GCPs", on: false, opacity: 1 },
   { id: "govt", label: "Government land", sub: "encroachment basis", on: true, opacity: 0.8 },
+  { id: "encroach", label: "Encroachment", sub: "built on public land", on: true, opacity: 1 },
+  { id: "change", label: "Change events", sub: "2023 -> 2025", on: false, opacity: 1 },
+  { id: "buildings", label: "Building footprints", sub: "epoch t1", on: false, opacity: 0.9 },
   { id: "conflicts", label: "Conflict markers", sub: "review queue", on: true, opacity: 1 },
 ];
 
@@ -44,6 +48,10 @@ interface S {
   plan?: SurveyPlan;
   residuals: Residual[];
   uncertainty?: UncertaintyGrid;
+  schema?: SchemaResult;
+  change?: ChangeResult;
+  resolutions: ResolutionCase[];
+  buildings?: FC;
 
   layers: LayerState[];
   toggleLayer: (id: LayerId) => void;
@@ -65,7 +73,8 @@ interface S {
   selectedConflict: string | null;
   selectConflict: (id: string | null) => void;
 
-  dockTab: "conflicts" | "survey" | "validate" | "audit" | "metrics";
+  dockTab: "conflicts" | "schema" | "survey" | "change" | "resolve"
+         | "validate" | "audit" | "metrics";
   setDockTab: (t: S["dockTab"]) => void;
   dockOpen: boolean;
   setDockOpen: (v: boolean) => void;
@@ -99,6 +108,7 @@ export const useStore = create<S>((set, get) => ({
   error: null,
   conflicts: [],
   residuals: [],
+  resolutions: [],
   layers: DEFAULT_LAYERS,
   done: [],
   running: null,
@@ -181,7 +191,8 @@ export const useStore = create<S>((set, get) => ({
   load: async () => {
     try {
       const [reference, legacy, aligned, harmonized, govt, metrics, conflicts,
-        plan, residuals, uncertainty] = await Promise.all([
+        plan, residuals, uncertainty, schema, change, resolutions,
+        buildings] = await Promise.all([
         j<FC>("reference.geojson"),
         j<FC>("legacy.geojson"),
         j<FC>("aligned.geojson"),
@@ -192,6 +203,10 @@ export const useStore = create<S>((set, get) => ({
         j<SurveyPlan>("survey_plan.json"),
         j<Residual[]>("residuals.json"),
         j<UncertaintyGrid>("uncertainty.json"),
+        j<SchemaResult>("schema.json"),
+        j<ChangeResult>("change.json"),
+        j<ResolutionCase[]>("resolutions.json"),
+        j<FC>("buildings_t1.geojson"),
       ]);
 
       const seed: AuditEntry[] = [];
@@ -202,6 +217,9 @@ export const useStore = create<S>((set, get) => ({
         ["match", "all", `F1 ${metrics.matching.f1}, ECE ${metrics.matching.ece}`],
         ["topology", "aligned", `${metrics.topology.total_before}→${metrics.topology.total_after} errors, area drift ${metrics.topology.area_drift_pct}%`],
         ["refuse_fill", "gaps", `${metrics.topology.refused_to_fill} parcel-sized holes flagged for survey, not filled`],
+        ["schema.match", "legacy", `${schema.fields.filter(f => f.column).length}/7 columns mapped, area unit ${schema.area_unit}`],
+        ["change.detect", "epoch t1", `${change.counts.new ?? 0} new, ${change.counts.demolished ?? 0} demolished, ${change.counts.heightened ?? 0} heightened`],
+        ["encroachment", "govt_land", `${change.encroachments.length} flagged over ${change.encroached_sqm} m2`],
         ["targeting", "aoi", `${metrics.targeting.n_points} GCPs planned`],
       ];
       for (const [action, target, reason] of sys) {
@@ -214,7 +232,8 @@ export const useStore = create<S>((set, get) => ({
       set({
         reference, legacy, aligned, harmonized, govt, metrics,
         conflicts: conflicts.map((c) => ({ ...c, status: "open" as const })),
-        plan, residuals, uncertainty, audit: seed,
+        plan, residuals, uncertainty, schema, change, resolutions, buildings,
+        audit: seed,
         layers: DEFAULT_LAYERS.map((l) =>
           l.id === "harmonized"
             ? { ...l, sub: `output · ${metrics.counts.legacy.toLocaleString()} parcels` }

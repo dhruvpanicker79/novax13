@@ -33,8 +33,8 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.spatial import cKDTree
 
-from bhoomisetu.geometry import safe_polygon
-from bhoomisetu.georef.transform import Similarity
+from kshetra.geometry import safe_polygon
+from kshetra.georef.transform import Similarity
 
 __all__ = ["CoarseAlignment", "vote_translation", "coarse_align"]
 

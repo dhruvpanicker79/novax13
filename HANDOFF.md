@@ -1,4 +1,4 @@
-# BhoomiSetu — device handoff
+# KSHETRA — device handoff
 
 **SIH 2026 · PS13 — Automated Integration and Intelligent Harmonization of
 Multi-source Geospatial Data for Urban Land Record Management**
@@ -35,16 +35,16 @@ Everything is committed to a local git repo (46 files, 2.7 MB).
 On **this** machine:
 ```bash
 cd C:\Users\nairb\SIH\novax_13
-gh repo create bhoomisetu --private --source=. --push
+gh repo create kshetra --private --source=. --push
 # or, if you made the repo in the browser:
-#   git remote add origin https://github.com/<you>/bhoomisetu.git
+#   git remote add origin https://github.com/<you>/kshetra.git
 #   git branch -M main && git push -u origin main
 ```
 
 On the **new** machine:
 ```bash
-git clone https://github.com/<you>/bhoomisetu.git
-cd bhoomisetu
+git clone https://github.com/<you>/kshetra.git
+cd kshetra
 ```
 
 ### Option B — copy the folder
@@ -91,8 +91,8 @@ wsl --install -d Ubuntu-24.04
 Reboot if prompted. Ubuntu asks for a UNIX username and password
 (**the password is invisible while typing — that is normal**). Then:
 ```bash
-cp -r /mnt/c/<path>/bhoomisetu ~/bhoomisetu && rm -rf ~/bhoomisetu/.venv
-cd ~/bhoomisetu && bash setup_wsl.sh
+cp -r /mnt/c/<path>/kshetra ~/kshetra && rm -rf ~/kshetra/.venv
+cd ~/kshetra && bash setup_wsl.sh
 ```
 Keep it on the Linux filesystem (`~`), not `/mnt/c` — cross-filesystem I/O in
 WSL is ~10× slower and we parse 80 MB tiles.
@@ -190,7 +190,7 @@ to copy.
 ## 5. File inventory
 
 ```
-backend/bhoomisetu/
+backend/kshetra/
   crs.py                231  UTM + Everest 1830, from Snyder      verified 23 Sep
   geometry.py           170  shape descriptors                    verified 23 Sep
   layers.py             154  Feature/Layer/Provenance + GeoJSON    verified 23 Sep

@@ -35,8 +35,8 @@ from shapely.geometry import MultiPolygon, Polygon
 from shapely.ops import unary_union
 from shapely.strtree import STRtree
 
-from bhoomisetu.geometry import safe_polygon
-from bhoomisetu.layers import Feature, Layer
+from kshetra.geometry import safe_polygon
+from kshetra.layers import Feature, Layer
 
 __all__ = ["TopologyReport", "clean_layer", "diagnose", "SLIVER_THINNESS"]
 

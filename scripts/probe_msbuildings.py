@@ -3,7 +3,7 @@ import csv, io, math, sys
 import requests
 
 LINKS = "https://minedbuildings.z5.web.core.windows.net/global-buildings/dataset-links.csv"
-HEADERS = {"User-Agent": "BhoomiSetu/0.1 (SIH2026 cadastral research)"}
+HEADERS = {"User-Agent": "KSHETRA/0.1 (SIH2026 cadastral research)"}
 
 AOIS = {
     "Chandausi (NAKSHA pilot)": (78.7749, 28.4515),

@@ -32,8 +32,8 @@ import numpy as np
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
-from bhoomisetu.geometry import safe_polygon
-from bhoomisetu.layers import Feature, Layer, Provenance
+from kshetra.geometry import safe_polygon
+from kshetra.layers import Feature, Layer, Provenance
 
 __all__ = ["CorruptionConfig", "CorruptionTruth", "corrupt_cadastre"]
 

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useStore } from "../lib/store";
 import * as I from "../lib/icons";
 import { ConfChip } from "./Panels";
+import { ChangeTab, ResolveTab, SchemaTab } from "./DockExtra";
 
 const f = (v: number | null | undefined, d = 2) =>
   v === null || v === undefined || Number.isNaN(v) ? "—" : v.toFixed(d);
@@ -9,7 +10,10 @@ const k = (v: number) => v.toLocaleString();
 
 const TABS = [
   ["conflicts", "Review queue"],
+  ["schema", "Schema"],
   ["survey", "Survey plan"],
+  ["change", "Change"],
+  ["resolve", "Resolution"],
   ["validate", "Validation"],
   ["audit", "Audit log"],
   ["metrics", "Pipeline"],
@@ -19,6 +23,7 @@ export default function Dock() {
   const { dockTab, setDockTab, dockOpen, setDockOpen, conflicts, metrics } = useStore();
   if (!metrics) return null;
   const open = conflicts.filter((c) => c.status === "open").length;
+  const enc = useStore.getState().change?.encroachments.length ?? 0;
 
   return (
     <div className="dock" style={dockOpen ? undefined : { maxHeight: 34 }}>
@@ -31,6 +36,9 @@ export default function Dock() {
             {id === "conflicts" && open > 0 && (
               <span className="chip warn" style={{ marginLeft: 7 }}>{open}</span>
             )}
+            {id === "change" && enc > 0 && (
+              <span className="chip crit" style={{ marginLeft: 7 }}>{enc}</span>
+            )}
           </button>
         ))}
         <div style={{ flex: 1 }} />
@@ -42,6 +50,9 @@ export default function Dock() {
       {dockOpen && (
         <div className="dbody">
           {dockTab === "conflicts" && <Conflicts />}
+          {dockTab === "schema" && <SchemaTab />}
+          {dockTab === "change" && <ChangeTab />}
+          {dockTab === "resolve" && <ResolveTab />}
           {dockTab === "survey" && <Survey />}
           {dockTab === "validate" && <Validate />}
           {dockTab === "audit" && <Audit />}

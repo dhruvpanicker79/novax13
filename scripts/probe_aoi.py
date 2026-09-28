@@ -9,7 +9,7 @@ import requests
 
 OVERPASS = "https://overpass-api.de/api/interpreter"
 # Overpass returns 406 without an identifying User-Agent.
-HEADERS = {"User-Agent": "BhoomiSetu/0.1 (SIH2026 cadastral research; contact via github)"}
+HEADERS = {"User-Agent": "KSHETRA/0.1 (SIH2026 cadastral research; contact via github)"}
 
 AOIS = {
     "Chandausi, Sambhal, UP (NAKSHA pilot)": (78.7749, 28.4515),

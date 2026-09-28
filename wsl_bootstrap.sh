@@ -8,7 +8,7 @@
 set -e
 
 SRC=/mnt/c/Users/nairb/SIH/novax_13
-DST=$HOME/bhoomisetu
+DST=$HOME/kshetra
 
 echo "=== copying project to the Linux filesystem ==="
 rm -rf "$DST"

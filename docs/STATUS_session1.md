@@ -1,4 +1,4 @@
-# BhoomiSetu — status
+# KSHETRA — status
 
 **SIH 2026 · Automated Integration and Intelligent Harmonization of
 Multi-source Geospatial Data for Urban Land Record Management**
@@ -114,7 +114,7 @@ the actual footprint went *up*.
 ## What exists
 
 ```
-bhoomisetu/
+kshetra/
   crs.py                  UTM + Everest 1830 <-> WGS84, from first principles
   geometry.py             shape descriptors (IoU, Hausdorff, turning signature…)
   layers.py               Feature/Layer/Provenance data model + GeoJSON I/O

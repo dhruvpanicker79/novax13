@@ -37,7 +37,7 @@ from dataclasses import dataclass, field
 import numpy as np
 from scipy.linalg import cho_factor, cho_solve
 
-from bhoomisetu.targeting.uncertainty import UncertaintyField
+from kshetra.targeting.uncertainty import UncertaintyField
 
 __all__ = ["SurveyPoint", "SurveyPlan", "SurveyPlanner"]
 

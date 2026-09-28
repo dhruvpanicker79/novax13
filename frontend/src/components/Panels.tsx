@@ -212,7 +212,10 @@ function LayerList() {
   return (
     <div className="card" style={{ width: 300 }}>
       <header><span className="grow">Layers</span></header>
-      <div style={{ padding: "4px 0 6px" }}>
+      {/* Bounded and scrollable: the stack grew past the viewport once the
+          change and encroachment layers were added, and pushed itself under
+          the dock. */}
+      <div style={{ padding: "4px 0 6px", maxHeight: 190, overflowY: "auto" }}>
         {layers.map((l) => (
           <div key={l.id}
                style={{ padding: "5px 11px", display: "flex", alignItems: "center", gap: 8 }}>

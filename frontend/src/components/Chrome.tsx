@@ -11,7 +11,7 @@ export function TopBar() {
   return (
     <div className="topbar">
       <button className="iconbtn" title="Menu"><I.Menu /></button>
-      <span className="title">BhoomiSetu</span>
+      <span className="title">KSHETRA</span>
       <span style={{ color: "var(--ink-faint)", fontSize: 12 }}>
         Chandausi, Sambhal · UP
       </span>

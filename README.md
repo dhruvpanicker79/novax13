@@ -1,4 +1,4 @@
-# BhoomiSetu
+# KSHETRA
 
 **SIH 2026 · PS13 — Automated Integration and Intelligent Harmonization of
 Multi-source Geospatial Data for Urban Land Record Management**
@@ -32,7 +32,7 @@ unpacks Node into `~/.local`.
 ```bash
 wsl -d Ubuntu-24.04
 bash /mnt/c/Users/nairb/SIH/novax_13/wsl_bootstrap.sh
-cd ~/bhoomisetu
+cd ~/kshetra
 ```
 
 Then:
@@ -79,7 +79,10 @@ ones. **Triage, not full automation.**
 | Overlapping parcel pairs | **5,038 → 0** |
 | Doubly-claimed land | **18,039 m² → 0 m²** |
 | Parcel-sized holes refused | **69** (harness deleted 73) |
-| Full pipeline | **52 s**, one core |
+| Schema columns auto-mapped | **7 / 7**, area unit `bigha` at 96.7% |
+| Change detection recall | **22/22 new · 28/28 demolished · 70/70 extended · 59/59 heightened** |
+| Encroachment on public land | **9 flagged, 252 m²** |
+| Full pipeline | **46 s**, one core |
 
 ### The USP — optimal survey targeting
 
@@ -121,21 +124,42 @@ t      survey plan           Esc    clear selection
 ```
 
 **Dock tabs** — Review queue (257 conflicts, sorted by area × (1 − confidence)),
-Survey plan, Validation (reliability curve, feature importance, area ledger),
-Audit log (hash-chained), Pipeline (stage timings).
+Schema (auto-mapping with evidence), Survey plan, Change (events + encroachment
++ dossier), Resolution (worked provenance cases), Validation (reliability curve,
+feature importance, area ledger), Audit log (hash-chained), Pipeline (timings).
+
+### Three things worth looking at
+
+**Schema tab — the area unit is inferred, not read.** Recorded values are divided
+by the surveyed area of the same parcels and the modal ratio matched against
+known units: `median m²/unit = 2500.45 over 2,862 parcels → bigha`. NIC's own
+Bhu-Naksha manual documents a hand-entered per-state scale factor on import
+(UP ×4000, Himachal ×22); this removes that magic number from the critical path.
+
+**Change tab — 59 "heightened" events have an unchanged footprint.** A building
+that gained three storeys is identical in plan view. Only the DSM height delta
+sees it, which is the entire argument for carrying DSM/DTM through the pipeline.
+
+**Resolution tab — authority is per attribute, not per source.** A GNSS fix at
+3 cm wins on geometry by inverse variance; the revenue record wins on ownership
+regardless of accuracy, because a drone cannot observe who owns a plot.
+Conflating the two produces a system that overwrites a title with a photograph.
 
 ---
 
 ## Layout
 
 ```
-backend/bhoomisetu/     3,636 LOC engine
+backend/kshetra/     4,582 LOC engine
   crs.py                UTM + Everest 1830, from Snyder (USGS PP 1395)
   synth/                city generator + 11-stage damage harness
   georef/               Hough vote + robust similarity; affine/poly/TPS
   matching/             blocking, 29 features, XGBoost + isotonic, assignment
   topology/             snap, overlap resolution, gap classification
   targeting/            GP uncertainty field + greedy submodular planner
+  attributes/           fuzzy text + schema auto-matching with unit inference
+  conflict/             provenance-weighted resolution, per-attribute authority
+  change/               epoch diff, DSM height delta, encroachment, dossiers
 frontend/src/           React + MapLibre GL, dark mission-control chrome
 scripts/
   verify_all.py         8 stages, ~25 assertions
@@ -159,5 +183,11 @@ data/raw/               real fetched layers (Chandausi, Pune)
   statement rather than a data limitation. Pune has 8,527 vs 8,171 with a
   systematic 16% median-area disagreement.
 - The ULPIN field is a faithful *shape*; the official encoding is not published.
-- Not yet built: FastAPI layer, schema auto-matching, conflict-resolution
-  engine, change detection, export. See `PLAN.md`.
+- Change detection runs against a synthetic later epoch with a known set of
+  modifications, including deliberately injected unauthorised construction on
+  public land. The generator never places buildings on government blocks, so
+  without injection there would be nothing to detect and the encroachment claim
+  would go untested.
+- Not yet built: FastAPI layer, export (GeoJSON/Shapefile/OGC/PDF), server-side
+  audit chain, RBAC. The audit chain in the UI is client-side and is a
+  demonstration, not a security control. See `PLAN.md`.

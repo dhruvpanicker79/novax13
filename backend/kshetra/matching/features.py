@@ -8,8 +8,8 @@ is solved in three stages:
    it floods the model with trivial negatives.
 2. **Feature extraction** -- this module. Each surviving pair is described by
    geometric agreement, attribute agreement, and *context*.
-3. **Scoring and assignment** -- see :mod:`bhoomisetu.matching.model` and
-   :mod:`bhoomisetu.matching.assign`.
+3. **Scoring and assignment** -- see :mod:`kshetra.matching.model` and
+   :mod:`kshetra.matching.assign`.
 
 The context features matter more than they look. Raw IoU cannot distinguish
 "this is a confident match" from "this is the best of several equally poor
@@ -23,12 +23,12 @@ from dataclasses import dataclass
 import numpy as np
 from shapely.strtree import STRtree
 
-from bhoomisetu.attributes.text import khasra_similarity, name_similarity
-from bhoomisetu.geometry import (
+from kshetra.attributes.text import khasra_similarity, name_similarity
+from kshetra.geometry import (
     compactness, elongation, iou, rectangularity, safe_polygon,
     signature_distance, turning_signature,
 )
-from bhoomisetu.layers import Layer
+from kshetra.layers import Layer
 
 __all__ = ["FieldMap", "CandidateSet", "generate_candidates",
            "build_feature_matrix", "FEATURE_NAMES"]

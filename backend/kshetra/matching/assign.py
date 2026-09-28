@@ -35,7 +35,7 @@ from scipy.optimize import linear_sum_assignment
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 
-from bhoomisetu.geometry import safe_polygon
+from kshetra.geometry import safe_polygon
 
 __all__ = ["Match", "AssignmentResult", "assign_matches"]
 
@@ -86,7 +86,7 @@ def assign_matches(cand, probs: np.ndarray, src_layer, tgt_layer,
     Parameters
     ----------
     cand:
-        The :class:`~bhoomisetu.matching.features.CandidateSet` that produced
+        The :class:`~kshetra.matching.features.CandidateSet` that produced
         ``probs`` (supplies the pair index array).
     probs:
         Calibrated match probability per candidate pair.

@@ -29,8 +29,8 @@ import numpy as np
 import xgboost as xgb
 from scipy.optimize import isotonic_regression
 
-from bhoomisetu.evaluation.metrics import classification_report
-from bhoomisetu.matching.features import FEATURE_NAMES
+from kshetra.evaluation.metrics import classification_report
+from kshetra.matching.features import FEATURE_NAMES
 
 __all__ = ["ParcelMatcher", "group_train_test_split"]
 

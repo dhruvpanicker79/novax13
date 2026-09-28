@@ -1,4 +1,4 @@
-# BUILD PROMPT — BhoomiSetu
+# BUILD PROMPT — KSHETRA
 
 > Paste this whole file as your brief. It is the single source of truth.
 > `BUILD_PROMPT.md` is the longer reference it was distilled from;
@@ -67,7 +67,7 @@ Six rules. Violating any one of them breaks the project.
 > sources. Legacy cadastral sheets carry a modal positional error of 3–4 m
 > (Sengupta et al., *Survey Review*, 2016, across 310 West Bengal sheets), while
 > the NAKSHA programme specifies orthoimagery accurate to 10 cm — a 30–40×
-> mismatch that makes naive overlay meaningless. BhoomiSetu harmonises these
+> mismatch that makes naive overlay meaningless. KSHETRA harmonises these
 > sources automatically: it globally georeferences legacy geometry, resolves
 > parcel identity with a learned spatial matcher whose confidence is
 > isotonically calibrated against held-out ground truth, repairs topology while
@@ -106,7 +106,7 @@ simply have them.
 > **Given a fixed survey budget, which 40 parcels do you send a surveyor to, so
 > that uncertainty across the entire city falls as far as possible?**
 
-Implement in `backend/bhoomisetu/targeting/`:
+Implement in `backend/kshetra/targeting/`:
 
 ```python
 # 1. Residual field: at each confidently matched parcel centroid xᵢ we observed

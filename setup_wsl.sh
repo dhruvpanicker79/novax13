@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-shot environment setup for BhoomiSetu inside WSL2 / Ubuntu.
+# One-shot environment setup for KSHETRA inside WSL2 / Ubuntu.
 #
 # Run from the project root:
 #     bash setup_wsl.sh
@@ -90,7 +90,7 @@ ${OK}${BOLD}Environment ready.${OFF}
   fetch data    PYTHONPATH=backend python scripts/fetch_data.py chandausi pune
   api           PYTHONPATH=backend uvicorn api.main:app --reload --port 8000
 
-${DIM}Note: keep the project on the Linux filesystem (e.g. ~/bhoomisetu) rather than
+${DIM}Note: keep the project on the Linux filesystem (e.g. ~/kshetra) rather than
 /mnt/c — cross-filesystem I/O in WSL is roughly 10x slower, which matters when
 parsing the 77 MB Microsoft footprint tiles.${OFF}
 EOF

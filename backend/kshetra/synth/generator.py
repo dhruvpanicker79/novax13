@@ -2,7 +2,7 @@
 
 The problem statement ships no dataset, so we build our own *ground truth* --
 a city whose correct answer we know exactly. Everything downstream is then
-measurable: we corrupt a copy of this city (see :mod:`bhoomisetu.synth.corruption`),
+measurable: we corrupt a copy of this city (see :mod:`kshetra.synth.corruption`),
 run the harmonisation pipeline, and score how much of the damage was recovered.
 
 The layout follows how Indian urban land actually subdivides:
@@ -23,8 +23,8 @@ import numpy as np
 from shapely.affinity import rotate as shp_rotate
 from shapely.geometry import Polygon, box
 
-from bhoomisetu.crs import geodetic_to_utm
-from bhoomisetu.layers import Feature, Layer, Provenance
+from kshetra.crs import geodetic_to_utm
+from kshetra.layers import Feature, Layer, Provenance
 
 __all__ = ["CityConfig", "generate_city"]
 

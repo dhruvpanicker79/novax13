@@ -1,4 +1,4 @@
-# BhoomiSetu backend dependencies.
+# KSHETRA backend dependencies.
 #
 # Two profiles, because the two environments are not equivalent:
 #
@@ -29,7 +29,7 @@ pydantic>=2.9
 
 # --- available on Linux, blocked by SAC on Windows ---
 # These are NOT required. pyproj in particular is used only to cross-validate
-# our from-scratch CRS engine (bhoomisetu/crs.py) -- if it agrees to
+# our from-scratch CRS engine (kshetra/crs.py) -- if it agrees to
 # sub-millimetre, the hand-rolled implementation is proven, which is a better
 # story than having imported it in the first place.
 pyproj>=3.6
