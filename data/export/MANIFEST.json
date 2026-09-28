@@ -1,0 +1,55 @@
+{
+ "product": "KSHETRA harmonized cadastre",
+ "generated_at": "2026-09-28T03:15:27Z",
+ "crs": "EPSG:4326 (geographic) / EPSG:32644 (projected)",
+ "audit_chain_head": "09c5bda5cb9b5a944d8a9f7d3c26063a3725ca59193d25465fd22f3aebcbcb44",
+ "pipeline": {
+  "rmse_before_m": 8.4529,
+  "rmse_after_m": 3.127,
+  "match_f1": 0.9993,
+  "calibration_ece": 9e-05
+ },
+ "disclaimer": "Contains SYNTHETIC cadastral geometry derived from OpenStreetMap block structure. Not a record of title. Advisory only.",
+ "files": [
+  {
+   "file": "kshetra_audit_report.pdf",
+   "bytes": 3961,
+   "sha256": "8186f4cd7db769e75b279da143e8938aa49ffff36fa6b1e05473416a62c11d34"
+  },
+  {
+   "file": "kshetra_harmonized.csv",
+   "bytes": 375630,
+   "sha256": "d78fc1c85d2bec11eedfa035db8ad53ab95387bcab26037c91e3ceec622ca896"
+  },
+  {
+   "file": "kshetra_harmonized.dbf",
+   "bytes": 3038212,
+   "sha256": "c368b6b621272504e35702255e8f8cd48b55407af0cd017a76f4e60248441413"
+  },
+  {
+   "file": "kshetra_harmonized.fields.json",
+   "bytes": 391,
+   "sha256": "e45bc72da1b3ab84e5140a99609b0e063948a3eebbcfa0ba4fcb856b8497b41c"
+  },
+  {
+   "file": "kshetra_harmonized.geojson",
+   "bytes": 1795539,
+   "sha256": "d5dfe338e20a8497967edd39e5eb1245a2f811825ff35699fd314b2c9f5e9ede"
+  },
+  {
+   "file": "kshetra_harmonized.prj",
+   "bytes": 131,
+   "sha256": "05f712aefcd48899ac10c9800921125348c635551f6363c518168db3a20a407c"
+  },
+  {
+   "file": "kshetra_harmonized.shp",
+   "bytes": 526204,
+   "sha256": "64a429282140a2d7fa0cc5078021c61e10d2c37f39e54c759e6549c35a6fe72b"
+  },
+  {
+   "file": "kshetra_harmonized.shx",
+   "bytes": 24476,
+   "sha256": "26ada13d473eb96dd8aff74aff7f78f5abf9815809c2df0e65c0227ae3bf61db"
+  }
+ ]
+}

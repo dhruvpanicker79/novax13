@@ -1,0 +1,15 @@
+{
+ "note": "DBF truncates field names to 10 characters; this maps the exported names back to canonical ones.",
+ "mapping": {
+  "KHSRA_NUM": "KHSRA_NUM",
+  "KHATEDAR_NM": "KHATEDAR_N",
+  "AREA_BIGHA": "AREA_BIGHA",
+  "LU_CODE": "LU_CODE",
+  "TENURE_TYP": "TENURE_TYP",
+  "WARD": "WARD",
+  "PARCEL_UID": "PARCEL_UID",
+  "fid": "fid",
+  "confidence": "confidence",
+  "relation": "relation"
+ }
+}
