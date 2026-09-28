@@ -3,6 +3,7 @@ import MapView from "./components/MapView";
 import Dock from "./components/Dock";
 import { TopBar, Rail, Readout } from "./components/Chrome";
 import { SourceCards } from "./components/Panels";
+import DemoMode from "./components/DemoMode";
 import { Boundary, OfflineBanner } from "./components/Guards";
 import { useStore } from "./lib/store";
 
@@ -45,6 +46,7 @@ export default function App() {
         <div className="stage">
           <Boundary label="Map"><MapView /></Boundary>
           <OfflineBanner />
+          {loaded && <Boundary label="Demo mode"><DemoMode /></Boundary>}
           {loaded && <Boundary label="Panels"><SourceCards /></Boundary>}
           <Readout />
           {loaded && <Boundary label="Data dock"><Dock /></Boundary>}

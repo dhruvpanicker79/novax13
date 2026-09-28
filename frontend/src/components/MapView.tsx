@@ -60,11 +60,11 @@ export default function MapView() {
           // the parcel colours carrying the information on top.
           { id: "sat", type: "raster", source: "sat",
             paint: {
-              "raster-brightness-min": 0.24,
+              "raster-brightness-min": 0.34,
               "raster-brightness-max": 1.0,
-              "raster-saturation": -0.42,
-              "raster-contrast": -0.08,
-              "raster-opacity": 0.92,
+              "raster-saturation": -0.58,
+              "raster-contrast": -0.16,
+              "raster-opacity": 0.72,
             } },
         ],
       },
@@ -197,15 +197,15 @@ export default function MapView() {
         id: "l-harm", type: "fill", source: "harmonized",
         paint: {
           "fill-color": "#14884a",
-          "fill-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.16, 16, 0.2, 18, 0.12],
+          "fill-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.3, 16, 0.26, 18, 0.16],
         },
       });
       m.addLayer({
         id: "l-harm-line", type: "line", source: "harmonized",
         paint: {
           "line-color": "#0f7a3f",
-          "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.7, 15, 1.3, 18, 2.4],
-          "line-opacity": 0.95,
+          "line-width": ["interpolate", ["linear"], ["zoom"], 13, 1.1, 15, 1.8, 18, 3.0],
+          "line-opacity": 1,
         },
       });
 
@@ -233,7 +233,7 @@ export default function MapView() {
         id: "l-leg", type: "line", source: "legacy",
         paint: {
           "line-color": "#c2650a",
-          "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.8, 15, 1.4, 18, 2.6],
+          "line-width": ["interpolate", ["linear"], ["zoom"], 13, 1.2, 15, 1.9, 18, 3.2],
           "line-opacity": 0.95,
           "line-dasharray": [2.5, 1.6],
         },
