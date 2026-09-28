@@ -225,7 +225,20 @@ def main():
         obs_res.append([b.x - a.x, b.y - a.y])
     obs_xy, obs_res = np.array(obs_xy), np.array(obs_res)
 
-    fieldm = stage("fit GP", lambda: UncertaintyField().fit(obs_xy, obs_res))
+    # Prediction scale measured on a DIFFERENT city by
+    # scripts/calibrate_targeting.py. Raw maximum-likelihood hyperparameters
+    # under-attribute variance to the per-parcel noise term, so the unscaled
+    # prediction is optimistic by a roughly constant factor.
+    calib_path = ROOT / "data" / "demo" / "targeting_calibration.json"
+    pred_scale, calib_note = 1.0, "uncalibrated"
+    if calib_path.exists():
+        _c = json.loads(calib_path.read_text(encoding="utf-8"))
+        pred_scale = float(_c.get("prediction_scale", 1.0))
+        calib_note = str(_c.get("note", ""))
+
+    fieldm = stage("fit GP",
+                   lambda: UncertaintyField(prediction_scale=pred_scale)
+                   .fit(obs_xy, obs_res))
     parcel_xy = np.array([[f.geometry.centroid.x, f.geometry.centroid.y]
                           for f in aligned])
     cands = SurveyPlanner.candidates_from_parcels(aligned.geometries(), 1500)
@@ -252,26 +265,47 @@ def main():
                             round(float(sd_after[i]), 3)])
 
     # validate the plan for real
-    def achieved(control):
-        if control is None or len(control) < 3:
+    def achieved(control_xy):
+        """Place control at these locations and measure what really remains.
+
+        Correction uses the GP posterior mean -- the same model that produced
+        the prediction. Correcting with a different interpolator would make
+        predicted and achieved describe two different estimators, which is what
+        made the earlier numbers disagree.
+        """
+        if control_xy is None or len(control_xy) < 3:
             return float("nan")
-        sp, dp = [], []
-        for cx, cy in control:
-            j = int(np.argmin(((parcel_xy - [cx, cy]) ** 2).sum(axis=1)))
+        cx, cv = [], []
+        for qx, qy in control_xy:
+            j = int(np.argmin(((parcel_xy - [qx, qy]) ** 2).sum(axis=1)))
             fid = aligned[j].fid
             tids = key.correspondence.get(fid, [])
             if len(tids) != 1:
                 continue
             a = aligned[j].geometry.centroid
             b = tmap[tids[0]].geometry.centroid
-            sp.append([a.x, a.y]); dp.append([b.x, b.y])
-        if len(sp) < 3:
+            cx.append([a.x, a.y])
+            cv.append([b.x - a.x, b.y - a.y])
+        if len(cx) < 3:
             return float("nan")
-        tps = ThinPlateSpline.fit(np.array(sp), np.array(dp), smoothing=1e-3)
-        w = aligned.map_geometry(tps.apply_geometry)
-        for a, b in zip(w.features, aligned.features):
-            a.fid = b.fid
-        return positional_rmse(w)
+
+        # true displacement at every parcel with a 1:1 counterpart
+        idx, true_d = [], []
+        for i, f in enumerate(aligned.features):
+            tids = key.correspondence.get(f.fid, [])
+            if len(tids) != 1:
+                continue
+            a = f.geometry.centroid
+            b = tmap[tids[0]].geometry.centroid
+            idx.append(i)
+            true_d.append([b.x - a.x, b.y - a.y])
+        if not idx:
+            return float("nan")
+        Q = parcel_xy[idx]
+        D = np.array(true_d)
+        pred = fieldm.posterior_mean(Q, np.array(cx), np.array(cv))
+        resid = D - pred
+        return float(np.sqrt((resid ** 2).sum(axis=1).mean()))
 
     rng = np.random.default_rng(0)
     rand = cands[rng.choice(len(cands), len(plan.points), replace=False)]
@@ -516,6 +550,9 @@ def main():
         "baseline": round(rmse_coarse, 4),
         "gain_curve": plan.gain_curve(),
         "hyper": plan.hyper,
+        "irreducible_m": round(fieldm.irreducible_rmse(), 4),
+        "prediction_scale": round(pred_scale, 4),
+        "calibration_note": calib_note,
         "n_parcels": plan.n_parcels,
         "stopped_because": plan.stopped_because,
     })

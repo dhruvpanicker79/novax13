@@ -60,6 +60,9 @@ export interface SurveyPlan {
   baseline: number;
   gain_curve: [number, number][];
   hyper: string; n_parcels: number; stopped_because: string;
+  irreducible_m: number;
+  prediction_scale: number;
+  calibration_note: string;
 }
 
 export interface Residual {

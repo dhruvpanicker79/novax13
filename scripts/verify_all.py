@@ -264,34 +264,46 @@ check("marginal gains are non-increasing (submodularity)",
 
 
 def achieved_rmse(control_xy):
-    """Actually place control at these locations and measure the real result.
+    """Place control at these locations and measure what really remains.
 
-    We know ground truth, so we can look up the true displacement at each
-    recommended point, use them as thin-plate-spline control, warp the layer,
-    and measure the residual error that genuinely remains.
+    Correction uses the GP posterior mean -- the same model that produced
+    the prediction. Correcting with a different interpolator would make
+    predicted and achieved describe two different estimators, which is what
+    made the earlier numbers disagree.
     """
-    if len(control_xy) < 3:
+    if control_xy is None or len(control_xy) < 3:
         return float("nan")
-    src_pts, dst_pts = [], []
-    for cx, cy in control_xy:
-        j = int(np.argmin(((parcel_xy - [cx, cy]) ** 2).sum(axis=1)))
+    cx, cv = [], []
+    for qx, qy in control_xy:
+        j = int(np.argmin(((parcel_xy - [qx, qy]) ** 2).sum(axis=1)))
         fid = aligned[j].fid
         tids = key.correspondence.get(fid, [])
         if len(tids) != 1:
             continue
         a = aligned[j].geometry.centroid
         b = tmap[tids[0]].geometry.centroid
-        src_pts.append([a.x, a.y])
-        dst_pts.append([b.x, b.y])
-    if len(src_pts) < 3:
+        cx.append([a.x, a.y])
+        cv.append([b.x - a.x, b.y - a.y])
+    if len(cx) < 3:
         return float("nan")
-    tps = ThinPlateSpline.fit(np.array(src_pts), np.array(dst_pts),
-                             smoothing=1e-3)
-    warped = aligned.map_geometry(tps.apply_geometry)
-    for a, b in zip(warped.features, aligned.features):
-        a.fid = b.fid
-    return positional_rmse(warped)[0]
 
+    # true displacement at every parcel with a 1:1 counterpart
+    idx, true_d = [], []
+    for i, f in enumerate(aligned.features):
+        tids = key.correspondence.get(f.fid, [])
+        if len(tids) != 1:
+            continue
+        a = f.geometry.centroid
+        b = tmap[tids[0]].geometry.centroid
+        idx.append(i)
+        true_d.append([b.x - a.x, b.y - a.y])
+    if not idx:
+        return float("nan")
+    Q = parcel_xy[idx]
+    D = np.array(true_d)
+    pred = fieldm.posterior_mean(Q, np.array(cx), np.array(cv))
+    resid = D - pred
+    return float(np.sqrt((resid ** 2).sum(axis=1).mean()))
 
 sel = np.array([[pt.x, pt.y] for pt in plan.points])
 rng = np.random.default_rng(0)

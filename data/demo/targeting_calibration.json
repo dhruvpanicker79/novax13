@@ -1,0 +1,50 @@
+{
+ "prediction_scale": 1.5046,
+ "note": "scale 1.505 from 4 held-out plans (ratios 1.48-1.61)",
+ "irreducible_rmse_m": 0.9009,
+ "train": [
+  {
+   "k": 10,
+   "predicted": 1.2052,
+   "achieved": 1.7853
+  },
+  {
+   "k": 20,
+   "predicted": 0.9536,
+   "achieved": 1.5344
+  },
+  {
+   "k": 40,
+   "predicted": 0.8623,
+   "achieved": 1.293
+  },
+  {
+   "k": 80,
+   "predicted": 0.8121,
+   "achieved": 1.2261
+  }
+ ],
+ "held_out": [
+  {
+   "k": 10,
+   "predicted": 2.0256,
+   "achieved": 1.7508
+  },
+  {
+   "k": 20,
+   "predicted": 1.6567,
+   "achieved": 1.4535
+  },
+  {
+   "k": 40,
+   "predicted": 1.522,
+   "achieved": 1.3485
+  },
+  {
+   "k": 80,
+   "predicted": 1.4483,
+   "achieved": 1.2715
+  }
+ ],
+ "held_out_ratio_median": 0.8776
+}

@@ -29,6 +29,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from typing import Sequence
+
 import numpy as np
 from scipy.optimize import minimize
 from scipy.linalg import cho_factor, cho_solve
@@ -51,10 +53,14 @@ class GPHyper:
 class UncertaintyField:
     """Posterior variance of the residual error field over an AOI."""
 
-    def __init__(self, jitter: float = 1e-8):
+    def __init__(self, jitter: float = 1e-8, prediction_scale: float = 1.0):
         self.hyper: GPHyper | None = None
         self.train_xy: np.ndarray | None = None
         self.jitter = jitter
+        #: Multiplier applied to predicted RMSE, measured against achieved
+        #: results on a held-out city. See :meth:`calibrate_prediction`.
+        self.prediction_scale = prediction_scale
+        self.calibration_note = "uncalibrated"
 
     # --- kernel ----------------------------------------------------------
     @staticmethod
@@ -174,14 +180,98 @@ class UncertaintyField:
         """Positional standard deviation in metres."""
         return np.sqrt(self.posterior_variance(query_xy, observed_xy))
 
-    def rmse(self, query_xy, observed_xy=None) -> float:
-        """Expected RMSE over the query set, in metres.
+    def posterior_mean(self, query_xy, observed_xy, observed_values) -> np.ndarray:
+        """GP posterior mean — the correction the variance actually describes.
 
-        The field is modelled per-axis, so the 2-D positional error combines
-        two independent components: RMSE_2d = sqrt(2) * sd_per_axis.
+        This matters more than it looks. The planner reports the posterior
+        *variance* that will remain after surveying a set of points. If the
+        correction is then applied with a different interpolator (a thin-plate
+        spline, say), the predicted and achieved errors describe two different
+        estimators and will not agree — the prediction looks optimistic
+        because it is answering a question nobody asked.
+
+        Correcting with the posterior mean of the same GP closes that gap:
+        predicted variance and achieved residual are now the same model.
+
+        This is ordinary kriging, and unlike an exact-interpolating spline it
+        handles observation noise properly: with ``noise_var > 0`` it does not
+        force the surface through noisy control, which is the correct
+        behaviour for real GNSS measurements.
+        """
+        self._require()
+        h = self.hyper
+        q = np.atleast_2d(np.asarray(query_xy, dtype=float))
+        s = np.atleast_2d(np.asarray(observed_xy, dtype=float))
+        y = np.asarray(observed_values, dtype=float)
+        if y.ndim == 1:
+            y = y[:, None]
+        if len(s) == 0:
+            return np.zeros((len(q), y.shape[1]))
+
+        Kss = self._k(s, s, h)
+        Kss[np.diag_indices_from(Kss)] += h.noise_var + self.jitter
+        c, low = cho_factor(Kss, lower=True)
+        alpha = cho_solve((c, low), y)          # (ns, d)
+        Kqs = self._k(q, s, h)
+        return Kqs @ alpha
+
+    def rmse(self, query_xy, observed_xy=None, include_noise: bool = True) -> float:
+        """Expected positional RMSE over the query set, in metres.
+
+        The field is modelled per-axis, so 2-D error combines two independent
+        components: RMSE_2d = sqrt(2) * sd_per_axis.
+
+        ``include_noise`` matters, and defaulting it to True fixes a real
+        error. :meth:`posterior_variance` describes the *latent field* — the
+        smooth, spatially correlated part that more control points genuinely
+        remove. It does not include the per-parcel noise term, which is
+        digitising jitter, vertex decimation and boundary ambiguity. That part
+        is independent between parcels, so no amount of survey control removes
+        any of it.
+
+        Reporting the latent variance alone lets the planner promise an
+        accuracy below its own noise floor, which is not achievable and will
+        be contradicted the moment anyone checks.
         """
         var = self.posterior_variance(query_xy, observed_xy)
-        return float(np.sqrt(2.0 * var.mean()))
+        if include_noise:
+            var = var + self.hyper.noise_var
+        return float(np.sqrt(2.0 * var.mean()) * self.prediction_scale)
+
+    def calibrate_prediction(self, pairs: Sequence[tuple[float, float]]
+                             ) -> float:
+        """Fit the prediction scale from measured (predicted, achieved) pairs.
+
+        Maximum-likelihood hyperparameters systematically under-attribute
+        variance to the noise term here: the fitted per-parcel scatter comes
+        out well below what is actually observed, so the raw prediction is
+        optimistic by a roughly constant factor. Because the factor *is*
+        roughly constant across plan sizes, it is a scale error rather than a
+        structural one, and measuring it is legitimate.
+
+        The discipline is the same one the matcher uses for its probabilities:
+        fit the correction on one city, apply it to another, and report both
+        numbers so the correction is visible rather than buried.
+        """
+        arr = np.array([(p, a) for p, a in pairs if p > 0 and np.isfinite(a)])
+        if len(arr) == 0:
+            return self.prediction_scale
+        ratios = arr[:, 1] / arr[:, 0]
+        self.prediction_scale = float(np.median(ratios))
+        self.calibration_note = (
+            f"scale {self.prediction_scale:.3f} from {len(arr)} held-out "
+            f"plans (ratios {ratios.min():.2f}-{ratios.max():.2f})")
+        return self.prediction_scale
+
+    def irreducible_rmse(self) -> float:
+        """The floor: positional RMSE that survey control cannot reduce.
+
+        Worth quoting alongside any plan. It is the honest answer to "why not
+        just survey more points?" — beyond this, extra control buys nothing
+        because the remaining error is independent per parcel.
+        """
+        self._require()
+        return float(np.sqrt(2.0 * self.hyper.noise_var))
 
     def _require(self):
         if self.hyper is None:
