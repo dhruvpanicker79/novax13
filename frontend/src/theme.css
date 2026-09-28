@@ -4,40 +4,43 @@
    colour, hairline separators instead of shadows, monospace for every figure. */
 
 :root {
-  /* chrome */
-  --bar: #14171a;
-  --panel: #22262b;
-  --panel-hi: #2a2f35;
-  --sunk: #1a1d21;
-  --field: #16191d;
-  --line: #343a41;
-  --line-soft: #2a2f35;
+  /* chrome — desktop GIS convention: grey frame, white working surfaces,
+     so the map and the data carry all the colour */
+  --bar: #eef0f3;
+  --panel: #ffffff;
+  --panel-hi: #f4f6f8;
+  --sunk: #e9ecef;
+  --field: #ffffff;
+  --line: #ccd2d9;
+  --line-soft: #e3e7ec;
 
   /* text */
-  --ink: #e6e9ec;
-  --ink-dim: #9aa2ab;
-  --ink-faint: #6b737c;
+  --ink: #171b20;
+  --ink-dim: #4f575f;
+  --ink-faint: #7d868f;
 
-  /* accent — one only */
-  --acc: #3fbf5f;
-  --acc-dim: #2d8f46;
-  --acc-ghost: rgba(63, 191, 95, 0.14);
+  /* accent — one only. Deeper than the dark-theme green: #3fbf5f reads as
+     highlighter on white and fails contrast for small text. */
+  --acc: #17914a;
+  --acc-dim: #0f6f37;
+  --acc-ghost: rgba(23, 145, 74, 0.11);
+  --on-acc: #ffffff;
 
-  /* semantic */
-  --ok: #3fbf5f;
-  --warn: #e8a33d;
-  --crit: #e05c54;
-  --info: #4d9fe8;
-  --ok-ghost: rgba(63, 191, 95, 0.16);
-  --warn-ghost: rgba(232, 163, 61, 0.16);
-  --crit-ghost: rgba(224, 92, 84, 0.16);
+  /* semantic — darkened for legibility on white */
+  --ok: #17914a;
+  --warn: #9a6710;
+  --crit: #b3261e;
+  --info: #1667ad;
+  --ok-ghost: rgba(23, 145, 74, 0.12);
+  --warn-ghost: rgba(154, 103, 16, 0.13);
+  --crit-ghost: rgba(179, 38, 30, 0.11);
 
   /* metrics */
   --rail: 46px;
   --bar-h: 46px;
   --r: 3px;
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -89,8 +92,8 @@ input:focus, select:focus { outline: none; border-color: var(--acc); }
 
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-track { background: var(--sunk); }
-::-webkit-scrollbar-thumb { background: #3a4047; border-radius: 5px; }
-::-webkit-scrollbar-thumb:hover { background: #4a525a; }
+::-webkit-scrollbar-thumb { background: #bcc3ca; border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: #9aa3ac; }
 
 /* ---------- app shell ---------- */
 .app { display: flex; flex-direction: column; height: 100%; }
@@ -121,7 +124,7 @@ input:focus, select:focus { outline: none; border-color: var(--acc); }
   color: var(--ink-dim);
 }
 .iconbtn:hover { background: var(--panel-hi); color: var(--ink); }
-.iconbtn.on { background: var(--acc); color: #08130c; }
+.iconbtn.on { background: var(--acc); color: var(--on-acc); }
 
 .search {
   display: flex; align-items: center; gap: 7px;
@@ -167,7 +170,7 @@ input:focus, select:focus { outline: none; border-color: var(--acc); }
   position: relative;
 }
 .rail .tool:hover { background: var(--panel-hi); color: var(--ink); }
-.rail .tool.on { background: var(--acc); color: #08130c; }
+.rail .tool.on { background: var(--acc); color: var(--on-acc); }
 .rail .sep { width: 22px; height: 1px; background: var(--line); margin: 5px 0; }
 
 .stage { flex: 1; position: relative; min-width: 0; }
@@ -185,6 +188,13 @@ input:focus, select:focus { outline: none; border-color: var(--acc); }
   border-radius: var(--r);
   overflow: hidden;
 }
+/* Only elements that float over the map get elevation; docked chrome keeps
+   borders alone, so shadow still means "above the map" and nothing else. */
+.float .card,
+.float .routecard,
+.dock,
+.readout { box-shadow: 0 1px 3px rgba(23, 27, 32, 0.10),
+                       0 6px 16px rgba(23, 27, 32, 0.07); }
 
 .card > header {
   background: var(--panel-hi);
@@ -234,7 +244,7 @@ input:focus, select:focus { outline: none; border-color: var(--acc); }
   background: var(--panel-hi); color: var(--ink-dim);
   font-size: 12px; font-weight: 500; text-align: center;
 }
-.tabs button.on { background: var(--acc); color: #08130c; font-weight: 600; }
+.tabs button.on { background: var(--acc); color: var(--on-acc); font-weight: 600; }
 .tabs button:disabled { opacity: 0.4; cursor: default; }
 
 /* form rows */
@@ -316,7 +326,7 @@ td.n, th.n { text-align: right; font-family: "IBM Plex Mono", monospace; font-va
 
 /* ---------- compass / readout ---------- */
 .readout {
-  background: rgba(20, 23, 26, 0.86);
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--line);
   border-radius: var(--r);
   padding: 8px 11px;

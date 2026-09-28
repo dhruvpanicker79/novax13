@@ -10,7 +10,7 @@ const SAT =
 /** Sequential single-hue ramp for confidence. Never a rainbow: a rainbow
  *  implies category boundaries that do not exist in a continuous measure. */
 const CONF_RAMP: (string | number)[] = [
-  0.0, "#3b1f1c", 0.5, "#7a3b24", 0.75, "#b8722a", 0.9, "#d9b23c", 0.97, "#6fcf6a", 1.0, "#2fbf5a",
+  0.0, "#7d1d16", 0.5, "#b3541e", 0.75, "#cf8f22", 0.9, "#b8bf2e", 0.97, "#4faa4a", 1.0, "#14884a",
 ];
 
 function lerpFC(a: FC, b: FC, t: number): FC {
@@ -51,15 +51,20 @@ export default function MapView() {
                  attribution: "Imagery © Esri" },
         },
         layers: [
-          // Hold the imagery well back. A survey basemap exists to give
-          // context, not to compete: desaturated and dimmed, the parcel
-          // colours read cleanly on top of it.
+          // Drawn beneath the imagery so the map degrades to a neutral sheet
+          // rather than to black if tiles never arrive. Demo venues lose wifi.
+          { id: "bg", type: "background",
+            paint: { "background-color": "#e9ecef" } },
+          // Light chrome, so the imagery is lifted rather than dimmed --
+          // washed slightly and desaturated so it reads as a backdrop, with
+          // the parcel colours carrying the information on top.
           { id: "sat", type: "raster", source: "sat",
             paint: {
-              "raster-brightness-max": 0.55,
-              "raster-brightness-min": 0.02,
-              "raster-saturation": -0.55,
-              "raster-contrast": 0.12,
+              "raster-brightness-min": 0.24,
+              "raster-brightness-max": 1.0,
+              "raster-saturation": -0.42,
+              "raster-contrast": -0.08,
+              "raster-opacity": 0.92,
             } },
         ],
       },
@@ -72,7 +77,22 @@ export default function MapView() {
     map.current = m;
     (window as any).__map = m;   // diagnostics handle
 
-    m.on("error", (e: any) => console.error("[maplibre]", e?.error?.message ?? e));
+    let tileFails = 0;
+    m.on("error", (e: any) => {
+      const msg = e?.error?.message ?? String(e);
+      if (e?.sourceId === "sat") {
+        // One failure is a flaky tile; a run of them means the basemap is
+        // unreachable, which the operator should be told rather than left to
+        // infer from a blank map.
+        if (++tileFails === 6) useStore.getState().setBasemapOffline(true);
+        return;
+      }
+      console.error("[maplibre]", msg);
+    });
+    m.on("sourcedata", (e: any) => {
+      if (e.sourceId === "sat" && e.isSourceLoaded && tileFails < 6)
+        useStore.getState().setBasemapOffline(false);
+    });
     m.on("mousemove", (e) =>
       useStore.getState().setCursor({
         lon: e.lngLat.lng, lat: e.lngLat.lat, zoom: m.getZoom(),
@@ -155,19 +175,19 @@ export default function MapView() {
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 9, 17, 34],
           "circle-color": ["interpolate", ["linear"], ["get", "sd"],
-            0, "#10233a", 1.5, "#1d5c8a", 2.5, "#3f9dc4", 3.5, "#f0d35a"],
-          "circle-opacity": 0.5, "circle-blur": 1,
+            0, "#dbe7f2", 1.5, "#8fbcd9", 2.5, "#3f9dc4", 3.5, "#e0a01f"],
+          "circle-opacity": 0.55, "circle-blur": 1,
         },
       });
 
       // ---- government land ----
       m.addLayer({
         id: "l-govt", type: "fill", source: "govt",
-        paint: { "fill-color": "#4d9fe8", "fill-opacity": 0.18 },
+        paint: { "fill-color": "#1667ad", "fill-opacity": 0.16 },
       });
       m.addLayer({
         id: "l-govt-line", type: "line", source: "govt",
-        paint: { "line-color": "#4d9fe8", "line-width": 1.4, "line-dasharray": [3, 2] },
+        paint: { "line-color": "#0f5590", "line-width": 1.6, "line-dasharray": [3, 2] },
       });
 
       // ---- harmonized output ----
@@ -176,14 +196,14 @@ export default function MapView() {
       m.addLayer({
         id: "l-harm", type: "fill", source: "harmonized",
         paint: {
-          "fill-color": "#3fbf5f",
-          "fill-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.13, 16, 0.18, 18, 0.1],
+          "fill-color": "#14884a",
+          "fill-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.16, 16, 0.2, 18, 0.12],
         },
       });
       m.addLayer({
         id: "l-harm-line", type: "line", source: "harmonized",
         paint: {
-          "line-color": "#6ee089",
+          "line-color": "#0f7a3f",
           "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.7, 15, 1.3, 18, 2.4],
           "line-opacity": 0.95,
         },
@@ -204,7 +224,7 @@ export default function MapView() {
       m.addLayer({
         id: "l-ref", type: "line", source: "reference",
         layout: { visibility: "none" },
-        paint: { "line-color": "#4d9fe8", "line-width": 1.1 },
+        paint: { "line-color": "#1667ad", "line-width": 1.2 },
       });
 
       // ---- legacy sheet: dashed, so it reads as the older, provisional
@@ -212,7 +232,7 @@ export default function MapView() {
       m.addLayer({
         id: "l-leg", type: "line", source: "legacy",
         paint: {
-          "line-color": "#f0a94a",
+          "line-color": "#c2650a",
           "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.8, 15, 1.4, 18, 2.6],
           "line-opacity": 0.95,
           "line-dasharray": [2.5, 1.6],
@@ -225,7 +245,7 @@ export default function MapView() {
         layout: { visibility: "none" },
         paint: {
           "line-color": ["interpolate", ["linear"], ["get", "m"],
-            0, "#3fbf5f", 5, "#e8a33d", 12, "#e05c54"],
+            0, "#17914a", 5, "#9a6710", 12, "#b3261e"],
           "line-width": 1.3, "line-opacity": 0.85,
         },
       });
@@ -236,7 +256,7 @@ export default function MapView() {
         layout: { visibility: "none" },
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["get", "rank"], 1, 22, 40, 9],
-          "circle-color": "#3fbf5f", "circle-opacity": 0.14,
+          "circle-color": "#17914a", "circle-opacity": 0.18,
         },
       });
       m.addLayer({
@@ -244,8 +264,8 @@ export default function MapView() {
         layout: { visibility: "none" },
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["get", "rank"], 1, 8, 40, 4],
-          "circle-color": "#3fbf5f",
-          "circle-stroke-color": "#08130c", "circle-stroke-width": 1.5,
+          "circle-color": "#17914a",
+          "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.6,
         },
       });
       m.addLayer({
@@ -255,15 +275,15 @@ export default function MapView() {
           "text-field": ["to-string", ["get", "rank"]],
           "text-size": 10, "text-offset": [0, -1.4], "text-allow-overlap": false,
         },
-        paint: { "text-color": "#e6e9ec", "text-halo-color": "#0d1114", "text-halo-width": 1.3 },
+        paint: { "text-color": "#171b20", "text-halo-color": "#ffffff", "text-halo-width": 1.6 },
       });
 
       // ---- epoch t1 footprints ----
       m.addLayer({
         id: "l-bldg", type: "fill", source: "buildings",
         layout: { visibility: "none" },
-        paint: { "fill-color": "#c9d3dd", "fill-opacity": 0.3,
-                 "fill-outline-color": "#e6e9ec" },
+        paint: { "fill-color": "#5a646e", "fill-opacity": 0.28,
+                 "fill-outline-color": "#2f363d" },
       });
 
       // ---- change events ----
@@ -273,13 +293,13 @@ export default function MapView() {
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.4, 18, 7],
           "circle-color": ["match", ["get", "kind"],
-            "new", "#4d9fe8",
-            "demolished", "#e05c54",
-            "extended", "#e8a33d",
-            "reduced", "#c07830",
-            "heightened", "#3fbf5f",
-            "#8c949c"],
-          "circle-stroke-color": "#0d1114", "circle-stroke-width": 1,
+            "new", "#1667ad",
+            "demolished", "#b3261e",
+            "extended", "#9a6710",
+            "reduced", "#7d5410",
+            "heightened", "#17914a",
+            "#6b7480"],
+          "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.2,
           "circle-opacity": 0.92,
         },
       });
@@ -289,7 +309,7 @@ export default function MapView() {
         id: "l-encroach-halo", type: "circle", source: "encroach",
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["get", "sqm"], 0, 12, 120, 34],
-          "circle-color": "#e05c54", "circle-opacity": 0.16, "circle-blur": 0.4,
+          "circle-color": "#b3261e", "circle-opacity": 0.2, "circle-blur": 0.4,
         },
       });
       m.addLayer({
@@ -297,8 +317,8 @@ export default function MapView() {
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 4, 18, 10],
           "circle-color": ["match", ["get", "sev"],
-            "severe", "#e05c54", "significant", "#e8a33d", "#8c949c"],
-          "circle-stroke-color": "#0d1114", "circle-stroke-width": 1.6,
+            "severe", "#b3261e", "significant", "#9a6710", "#6b7480"],
+          "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.8,
         },
       });
       m.addLayer({
@@ -307,8 +327,8 @@ export default function MapView() {
           "text-field": ["concat", ["to-string", ["round", ["get", "sqm"]]], " m2"],
           "text-size": 10, "text-offset": [0, -1.5], "text-allow-overlap": false,
         },
-        paint: { "text-color": "#f2b5b1", "text-halo-color": "#0d1114",
-                 "text-halo-width": 1.4 },
+        paint: { "text-color": "#8e1a14", "text-halo-color": "#ffffff",
+                 "text-halo-width": 1.8 },
       });
 
       // ---- conflicts ----
@@ -320,12 +340,12 @@ export default function MapView() {
           // once the operator zooms in.
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1.8, 16, 3.4, 18, 6.5],
           "circle-color": ["match", ["get", "cls"],
-            "unresolved", "#e05c54",
-            "missing_reference", "#e8a33d",
-            "subdivision", "#4d9fe8",
-            "amalgamation", "#a06fd0",
-            "#e8a33d"],
-          "circle-stroke-color": "#0d1114", "circle-stroke-width": 1,
+            "unresolved", "#b3261e",
+            "missing_reference", "#9a6710",
+            "subdivision", "#1667ad",
+            "amalgamation", "#7a3fa8",
+            "#9a6710"],
+          "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.2,
           "circle-opacity": 0.9,
         },
       });
@@ -334,7 +354,7 @@ export default function MapView() {
       m.addLayer({
         id: "l-sel", type: "line", source: "harmonized",
         filter: ["==", ["get", "fid"], "___none___"],
-        paint: { "line-color": "#ffffff", "line-width": 2.4 },
+        paint: { "line-color": "#111417", "line-width": 2.6 },
       });
 
       m.on("click", "l-harm", (e) => {

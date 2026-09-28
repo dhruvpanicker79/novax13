@@ -147,7 +147,7 @@ function Compass() {
         <circle cx="26" cy="26" r="22" fill="none" stroke="var(--line)" strokeWidth="1" />
         <circle cx="26" cy="26" r="16" fill="none" stroke="var(--line-soft)" strokeWidth="1" />
         <path d="M26 7 L30 26 L26 22 L22 26 Z" fill="var(--acc)" />
-        <path d="M26 45 L22 26 L26 30 L30 26 Z" fill="#5a6169" />
+        <path d="M26 45 L22 26 L26 30 L30 26 Z" fill="#aab2ba" />
         {["N", "E", "S", "W"].map((t, i) => {
           const a = (i * 90 - 90) * (Math.PI / 180);
           return (

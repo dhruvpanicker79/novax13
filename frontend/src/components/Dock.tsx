@@ -3,6 +3,7 @@ import { useStore } from "../lib/store";
 import * as I from "../lib/icons";
 import { ConfChip } from "./Panels";
 import { ChangeTab, ExportTab, ResolveTab, SchemaTab } from "./DockExtra";
+import { Boundary } from "./Guards";
 
 const f = (v: number | null | undefined, d = 2) =>
   v === null || v === undefined || Number.isNaN(v) ? "—" : v.toFixed(d);
@@ -49,7 +50,7 @@ export default function Dock() {
         </button>
       </header>
       {dockOpen && (
-        <div className="dbody">
+        <div className="dbody"><Boundary label={`${dockTab} tab`}>
           {dockTab === "conflicts" && <Conflicts />}
           {dockTab === "schema" && <SchemaTab />}
           {dockTab === "change" && <ChangeTab />}
@@ -59,7 +60,7 @@ export default function Dock() {
           {dockTab === "validate" && <Validate />}
           {dockTab === "audit" && <Audit />}
           {dockTab === "metrics" && <Pipeline />}
-        </div>
+        </Boundary></div>
       )}
     </div>
   );

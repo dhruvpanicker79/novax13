@@ -87,6 +87,8 @@ interface S {
   audit: AuditEntry[];
   act: (id: string, action: Conflict["status"], reason: string) => void;
 
+  basemapOffline: boolean;
+  setBasemapOffline: (v: boolean) => void;
   cursor: { lon: number; lat: number; zoom: number };
   setCursor: (c: S["cursor"]) => void;
 
@@ -122,6 +124,8 @@ export const useStore = create<S>((set, get) => ({
   dockOpen: true,
   panel: "project",
   audit: [],
+  basemapOffline: false,
+  setBasemapOffline: (basemapOffline) => set({ basemapOffline }),
   cursor: { lon: 78.7749, lat: 28.4515, zoom: 15 },
 
   setCursor: (cursor) => set({ cursor }),

@@ -226,7 +226,7 @@ function LayerList() {
                 width: 15, height: 15, borderRadius: 2, flex: "0 0 15px",
                 border: `1px solid ${l.on ? "var(--acc)" : "var(--line)"}`,
                 background: l.on ? "var(--acc)" : "transparent",
-                display: "grid", placeItems: "center", color: "#08130c",
+                display: "grid", placeItems: "center", color: "var(--on-acc)",
               }}>
               {l.on && <I.Check />}
             </button>

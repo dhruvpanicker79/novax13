@@ -3,6 +3,7 @@ import MapView from "./components/MapView";
 import Dock from "./components/Dock";
 import { TopBar, Rail, Readout } from "./components/Chrome";
 import { SourceCards } from "./components/Panels";
+import { Boundary, OfflineBanner } from "./components/Guards";
 import { useStore } from "./lib/store";
 
 export default function App() {
@@ -42,10 +43,11 @@ export default function App() {
       <div className="body">
         <Rail />
         <div className="stage">
-          <MapView />
-          {loaded && <SourceCards />}
+          <Boundary label="Map"><MapView /></Boundary>
+          <OfflineBanner />
+          {loaded && <Boundary label="Panels"><SourceCards /></Boundary>}
           <Readout />
-          {loaded && <Dock />}
+          {loaded && <Boundary label="Data dock"><Dock /></Boundary>}
           {!loaded && !error && (
             <div style={{ position: "absolute", inset: 0, display: "grid",
                           placeItems: "center", color: "var(--ink-faint)" }}>
