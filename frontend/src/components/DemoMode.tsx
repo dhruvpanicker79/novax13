@@ -14,6 +14,9 @@ import * as I from "../lib/icons";
  * typed in, so the script cannot drift away from what the pipeline actually
  * produced.
  */
+const m2 = (v: number | null | undefined) =>
+  v === null || v === undefined ? "--" : v.toFixed(2);
+
 interface Beat {
   title: string;
   say: string;
@@ -39,7 +42,7 @@ const BEATS: Beat[] = [
     say: "Here is the 1987 cadastral sheet over the same ground. Every arrow " +
          "is one parcel's displacement. You cannot match this by overlaying it.",
     layers: { legacy: true, residuals: true, harmonized: false },
-    figure: (m) => `positional RMSE ${m.georef.rmse_raw} m — against NAKSHA's ` +
+    figure: (m) => `positional RMSE ${m2(m.georef.rmse_raw)} m — against NAKSHA's ` +
                    `10 cm orthoimagery spec`,
   },
   {
@@ -49,7 +52,7 @@ const BEATS: Beat[] = [
          "overlaps its neighbour more than its own counterpart.",
     layers: { legacy: true, residuals: false, harmonized: true },
     action: () => useStore.getState().playAlignment(),
-    figure: (m) => `${m.georef.rmse_raw} m → ${m.georef.rmse_coarse} m, ` +
+    figure: (m) => `${m2(m.georef.rmse_raw)} m → ${m2(m.georef.rmse_coarse)} m, ` +
                    `${m.georef.inliers.toLocaleString()} inliers`,
   },
   {
@@ -80,8 +83,8 @@ const BEATS: Beat[] = [
     layers: { confidence: false, harmonized: true },
     figure: (m) => `overlaps ${m.topology.overlaps_before.toLocaleString()} → ` +
                    `${m.topology.overlaps_after} · doubly-claimed ` +
-                   `${m.topology.overlap_area_before.toLocaleString()} → ` +
-                   `${m.topology.overlap_area_after} m²`,
+                   `${Math.round(m.topology.overlap_area_before).toLocaleString()} → ` +
+                   `${Math.round(m.topology.overlap_area_after)} m²`,
   },
   {
     title: "It refuses to guess",
@@ -92,7 +95,7 @@ const BEATS: Beat[] = [
     layers: { encroach: true, govt: true, change: true },
     figure: (m) => `${m.topology.refused_to_fill} holes refused · ` +
                    `${m.change.encroachment} encroachments over ` +
-                   `${m.change.encroached_sqm} m²`,
+                   `${Math.round(m.change.encroached_sqm)} m²`,
   },
   {
     title: "Where to send the surveyor",
@@ -103,9 +106,9 @@ const BEATS: Beat[] = [
     tab: "survey",
     layers: { survey: true, uncertainty: true, encroach: false, change: false },
     figure: (m, p) =>
-      `${p.points.length} GCPs · predicted ${m.targeting.rmse_predicted} m · ` +
-      `achieved ${m.targeting.rmse_achieved} m · random ` +
-      `${m.targeting.rmse_random} m`,
+      `${p.points.length} GCPs · predicted ${m2(m.targeting.rmse_predicted)} m · ` +
+      `achieved ${m2(m.targeting.rmse_achieved)} m · random ` +
+      `${m2(m.targeting.rmse_random)} m`,
   },
 ];
 
