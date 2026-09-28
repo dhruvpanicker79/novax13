@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import type {
   AuditEntry, ChangeResult, Conflict, FC, Metrics, Residual,
-  ResolutionCase, SchemaResult, StageId, SurveyPlan, UncertaintyGrid,
+  ExportManifest, ResolutionCase, SchemaResult, StageId, SurveyPlan,
+  UncertaintyGrid,
 } from "./types";
 import { STAGES } from "./types";
 
@@ -52,6 +53,7 @@ interface S {
   change?: ChangeResult;
   resolutions: ResolutionCase[];
   buildings?: FC;
+  manifest?: ExportManifest;
 
   layers: LayerState[];
   toggleLayer: (id: LayerId) => void;
@@ -74,7 +76,7 @@ interface S {
   selectConflict: (id: string | null) => void;
 
   dockTab: "conflicts" | "schema" | "survey" | "change" | "resolve"
-         | "validate" | "audit" | "metrics";
+         | "validate" | "audit" | "export" | "metrics";
   setDockTab: (t: S["dockTab"]) => void;
   dockOpen: boolean;
   setDockOpen: (v: boolean) => void;
@@ -192,7 +194,7 @@ export const useStore = create<S>((set, get) => ({
     try {
       const [reference, legacy, aligned, harmonized, govt, metrics, conflicts,
         plan, residuals, uncertainty, schema, change, resolutions,
-        buildings] = await Promise.all([
+        buildings, manifest] = await Promise.all([
         j<FC>("reference.geojson"),
         j<FC>("legacy.geojson"),
         j<FC>("aligned.geojson"),
@@ -207,6 +209,7 @@ export const useStore = create<S>((set, get) => ({
         j<ChangeResult>("change.json"),
         j<ResolutionCase[]>("resolutions.json"),
         j<FC>("buildings_t1.geojson"),
+        j<ExportManifest>("export_manifest.json"),
       ]);
 
       const seed: AuditEntry[] = [];
@@ -233,7 +236,7 @@ export const useStore = create<S>((set, get) => ({
         reference, legacy, aligned, harmonized, govt, metrics,
         conflicts: conflicts.map((c) => ({ ...c, status: "open" as const })),
         plan, residuals, uncertainty, schema, change, resolutions, buildings,
-        audit: seed,
+        manifest, audit: seed,
         layers: DEFAULT_LAYERS.map((l) =>
           l.id === "harmonized"
             ? { ...l, sub: `output · ${metrics.counts.legacy.toLocaleString()} parcels` }

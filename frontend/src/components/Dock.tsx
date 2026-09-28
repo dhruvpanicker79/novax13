@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useStore } from "../lib/store";
 import * as I from "../lib/icons";
 import { ConfChip } from "./Panels";
-import { ChangeTab, ResolveTab, SchemaTab } from "./DockExtra";
+import { ChangeTab, ExportTab, ResolveTab, SchemaTab } from "./DockExtra";
 
 const f = (v: number | null | undefined, d = 2) =>
   v === null || v === undefined || Number.isNaN(v) ? "—" : v.toFixed(d);
@@ -16,6 +16,7 @@ const TABS = [
   ["resolve", "Resolution"],
   ["validate", "Validation"],
   ["audit", "Audit log"],
+  ["export", "Export"],
   ["metrics", "Pipeline"],
 ] as const;
 
@@ -53,6 +54,7 @@ export default function Dock() {
           {dockTab === "schema" && <SchemaTab />}
           {dockTab === "change" && <ChangeTab />}
           {dockTab === "resolve" && <ResolveTab />}
+          {dockTab === "export" && <ExportTab />}
           {dockTab === "survey" && <Survey />}
           {dockTab === "validate" && <Validate />}
           {dockTab === "audit" && <Audit />}

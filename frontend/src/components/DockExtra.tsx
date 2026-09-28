@@ -266,3 +266,103 @@ export function ResolveTab() {
     </div>
   );
 }
+
+/* ================================================================== */
+export function ExportTab() {
+  const { manifest, metrics } = useStore();
+  if (!manifest || !metrics) return null;
+  const kb = (b: number) => (b / 1024).toFixed(1);
+  const icon: Record<string, string> = {
+    geojson: "web clients, QGIS, Leaflet",
+    csv: "attribute table for spreadsheets",
+    shp: "ESRI Shapefile — what Bhu-Naksha imports",
+    shx: "shapefile index",
+    dbf: "shapefile attributes",
+    prj: "coordinate reference system",
+    pdf: "audit report — every change with its reason",
+    json: "field-name mapping / manifest",
+  };
+  const extOf = (f: string) => f.split(".").pop() ?? "";
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 340px" }}>
+      <div>
+        <div style={{ padding: "9px 13px 4px" }}>
+          <H>Export bundle — {manifest.files.length} files</H>
+        </div>
+        <table>
+          <thead><tr>
+            <th>File</th><th>Consumer</th><th className="n">Size KB</th>
+            <th className="n">SHA-256</th>
+          </tr></thead>
+          <tbody>
+            {manifest.files.map((f) => (
+              <tr key={f.file}>
+                <td className="num" style={{ color: "var(--acc)" }}>{f.file}</td>
+                <td style={{ color: "var(--ink-faint)" }}>
+                  {icon[extOf(f.file)] ?? "—"}</td>
+                <td className="n">{kb(f.bytes)}</td>
+                <td className="n" style={{ color: "var(--ink-faint)" }}>
+                  {f.sha256.slice(0, 16)}…</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{ padding: "11px 13px" }}>
+          <P>
+            Every file is hashed and the bundle records the audit chain head, so
+            an exported layer can be tied back to the exact pipeline state that
+            produced it. Shapefile DBF truncates field names to 10 characters;
+            the truncation is written to a sidecar rather than silently turning
+            <span className="num"> KHATEDAR_NM</span> into
+            <span className="num"> KHATEDAR_N</span> and losing what it meant.
+          </P>
+        </div>
+      </div>
+
+      <div style={{ padding: "11px 13px", borderLeft: "1px solid var(--line)" }}>
+        <H>Provenance</H>
+        <div className="num" style={{ fontSize: 11.5, lineHeight: 1.85 }}>
+          <div>generated<b style={{ float: "right" }}>
+            {manifest.generated_at.replace("T", " ").replace("Z", "")}</b></div>
+          <div>CRS<b style={{ float: "right" }}>EPSG:4326 / 32644</b></div>
+          <div>RMSE<b style={{ float: "right" }}>
+            {manifest.pipeline.rmse_before_m} → {manifest.pipeline.rmse_after_m} m</b></div>
+          <div>match F1<b style={{ float: "right" }}>{manifest.pipeline.match_f1}</b></div>
+          <div>ECE<b style={{ float: "right" }}>{manifest.pipeline.calibration_ece}</b></div>
+        </div>
+
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
+          <H>Audit chain head</H>
+          <div className="num" style={{ fontSize: 10.5, color: "var(--acc)",
+                                        wordBreak: "break-all", lineHeight: 1.6 }}>
+            {manifest.audit_chain_head}
+          </div>
+          <P>
+            Publishing this hash externally anchors the log: the whole history
+            can be re-derived and checked against it.
+          </P>
+        </div>
+
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
+          <span className="chip warn">advisory</span>
+          <P>{manifest.disclaimer}</P>
+        </div>
+
+        <div style={{ marginTop: 8 }}>
+          <H>Also served over</H>
+          <div className="num" style={{ fontSize: 11, color: "var(--ink-dim)",
+                                        lineHeight: 1.8 }}>
+            <div>/ogc/collections</div>
+            <div>/ogc/collections/harmonized/items</div>
+          </div>
+          <P>
+            OGC API – Features, so QGIS or a municipal GIS can consume the
+            harmonized layer directly. Owner names are withheld server-side for
+            unauthenticated callers.
+          </P>
+        </div>
+      </div>
+    </div>
+  );
+}

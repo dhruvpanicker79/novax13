@@ -162,3 +162,14 @@ export interface ResolutionCase {
   needs_human: boolean;
   reason: string;
 }
+
+/* ---- export manifest ---- */
+export interface ExportManifest {
+  product: string;
+  generated_at: string;
+  crs: string;
+  audit_chain_head: string;
+  pipeline: Record<string, number | null>;
+  disclaimer: string;
+  files: { file: string; bytes: number; sha256: string }[];
+}
