@@ -1,6 +1,8 @@
 import { useStore } from "../lib/store";
 import { STAGES } from "../lib/types";
 import * as I from "../lib/icons";
+import { Logo } from "./Logo";
+import { ROLES } from "../lib/store";
 
 /* ------------------------------------------------------------------ */
 export function TopBar() {
@@ -11,6 +13,7 @@ export function TopBar() {
   return (
     <div className="topbar">
       <button className="iconbtn" title="Menu"><I.Menu /></button>
+      <span style={{ color: "var(--ink)", marginRight: 2 }}><Logo size={19} /></span>
       <span className="title">KSHETRA</span>
       <span style={{ color: "var(--ink-faint)", fontSize: 12 }}>
         Chandausi, Sambhal · UP
@@ -57,13 +60,28 @@ export function TopBar() {
       </button>
       <button className="iconbtn" title="Report"><I.Report /></button>
 
-      <div className="modepill">
-        <I.Shield />
-        <span>{metrics ? "Reviewer" : "—"}</span>
-        <I.Chevron />
-      </div>
+      <RolePill />
       <button className="iconbtn" title="More"><I.Kebab /></button>
     </div>
+  );
+}
+
+/** Current role, and the way back to the sign-in screen. The chip states
+ *  plainly whether this session is seeing the full record or a redacted one,
+ *  so nobody mistakes withheld data for missing data. */
+function RolePill() {
+  const { role, signOut } = useStore();
+  const r = ROLES.find((x) => x.id === role)!;
+  return (
+    <button className="modepill" onClick={signOut}
+            title="Sign out and change role">
+      <I.Shield />
+      <span>{r.label}</span>
+      <span className={`chip ${r.seesOwner ? "ok" : "warn"}`}
+            style={{ marginLeft: 2 }}>
+        {r.seesOwner ? "full record" : "redacted"}
+      </span>
+    </button>
   );
 }
 

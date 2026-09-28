@@ -68,7 +68,8 @@ export default function Dock() {
 
 /* ---------------------------------------------------------------- */
 function Conflicts() {
-  const { conflicts, selectedConflict, selectConflict, act } = useStore();
+  const { conflicts, selectedConflict, selectConflict, act, role } = useStore();
+  const seesOwner = role === "clerk" || role === "tehsildar";
   const tone: Record<string, string> = {
     unresolved: "crit", missing_reference: "warn",
     subdivision: "info", amalgamation: "info", positional_conflict: "warn",
@@ -105,7 +106,8 @@ function Conflicts() {
                 {c.class.replace(/_/g, " ")}</span></td>
               <td className="num">{c.khasra ?? "—"}</td>
               <td style={{ maxWidth: 190, overflow: "hidden", textOverflow: "ellipsis" }}>
-                {c.owner ?? "—"}</td>
+                {seesOwner ? (c.owner ?? "—")
+                           : <span className="chip mute">withheld</span>}</td>
               <td className="n">{c.area_sqm.toFixed(1)}</td>
               <td className="n"><ConfChip p={c.confidence} /></td>
               <td style={{ color: "var(--ink-faint)", maxWidth: 260,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useStore } from "../lib/store";
+import { redact, useStore } from "../lib/store";
 import * as I from "../lib/icons";
 
 const n2 = (v: number | null | undefined, d = 2) =>
@@ -50,9 +50,13 @@ function PanelCard() {
   const [tab, setTab] = useState<"basic" | "advanced" | "actions">("basic");
   if (!metrics) return null;
 
-  const feat = selected
+  const role = useStore((st) => st.role);
+  const raw = selected
     ? harmonized?.features.find((f) => f.properties.fid === selected)
     : undefined;
+  // Redact at the point of render. A field the role may not see must not be
+  // reachable from any panel, including ones added later.
+  const feat = raw ? { ...raw, properties: redact(raw.properties, role) } : undefined;
   const conf = conflicts.find((c) => c.id === selectedConflict);
 
   return (
@@ -82,7 +86,8 @@ function PanelCard() {
           {tab === "basic" && (
             <>
               <Row k="Khasra no." v={feat.properties.KHSRA_NUM ?? "—"} mono />
-              <Row k="Khatedar" v={feat.properties.KHATEDAR_NM ?? "—"} />
+              <Row k="Khatedar" v={feat.properties.KHATEDAR_NM
+                       ?? <span className="chip mute">withheld</span>} />
               <Row k="Area, m²" v={n2(feat.properties.area_sqm ?? 0, 1)} mono />
               <Row k="Land use" v={feat.properties.LU_CODE ?? "—"} />
               <Row k="Tenure" v={feat.properties.TENURE_TYP ?? "—"} />

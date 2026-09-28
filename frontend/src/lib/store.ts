@@ -14,6 +14,49 @@ async function j<T>(name: string): Promise<T> {
   return r.json();
 }
 
+
+/** Authorisation model. Mirrors VISIBLE / MAY_ACT in api/main.py — the UI must
+ *  not offer an action the server would refuse, and must not display a field
+ *  the server would withhold. */
+export type Role = "public" | "surveyor" | "clerk" | "tehsildar";
+
+export interface RoleSpec {
+  id: Role; label: string; blurb: string;
+  seesOwner: boolean; seesTenure: boolean; canExport: boolean;
+  may: string[];
+}
+
+export const ROLES: RoleSpec[] = [
+  { id: "public", label: "Public", may: [],
+    blurb: "Open access. Parcel geometry and khasra numbers only.",
+    seesOwner: false, seesTenure: false, canExport: false },
+  { id: "surveyor", label: "Surveyor", may: ["survey"],
+    blurb: "Field staff. May raise a parcel for ground survey.",
+    seesOwner: false, seesTenure: true, canExport: true },
+  { id: "clerk", label: "Revenue clerk", may: ["escalate", "survey"],
+    blurb: "Office staff. Full record, may escalate but not decide.",
+    seesOwner: true, seesTenure: true, canExport: true },
+  { id: "tehsildar", label: "Tehsildar", may: ["accept", "reject", "escalate", "survey"],
+    blurb: "Revenue officer. Authorised to resolve a contested parcel.",
+    seesOwner: true, seesTenure: true, canExport: true },
+];
+
+/** Withhold what this role may not see. Applied wherever an attribute is
+ *  rendered, so a redacted field cannot leak through a panel nobody checked. */
+export function redact(props: Record<string, any>, role: Role) {
+  const r = ROLES.find((x) => x.id === role)!;
+  const out = { ...props };
+  const withheld: string[] = [];
+  if (!r.seesOwner && "KHATEDAR_NM" in out) { delete out.KHATEDAR_NM; withheld.push("owner"); }
+  if (!r.seesTenure) {
+    for (const k of ["TENURE_TYP", "AREA_BIGHA"]) {
+      if (k in out) { delete out[k]; withheld.push(k); }
+    }
+  }
+  if (withheld.length) out._redacted = withheld;
+  return out;
+}
+
 export type LayerId =
   | "reference" | "legacy" | "aligned" | "harmonized" | "govt"
   | "residuals" | "confidence" | "conflicts" | "survey" | "uncertainty"
@@ -87,6 +130,10 @@ interface S {
   audit: AuditEntry[];
   act: (id: string, action: Conflict["status"], reason: string) => void;
 
+  role: Role;
+  signedIn: boolean;
+  signIn: (r: Role) => void;
+  signOut: () => void;
   basemapOffline: boolean;
   setBasemapOffline: (v: boolean) => void;
   cursor: { lon: number; lat: number; zoom: number };
@@ -124,6 +171,10 @@ export const useStore = create<S>((set, get) => ({
   dockOpen: true,
   panel: "project",
   audit: [],
+  role: "tehsildar",
+  signedIn: false,
+  signIn: (role) => set({ role, signedIn: true }),
+  signOut: () => set({ signedIn: false, selected: null, selectedConflict: null }),
   basemapOffline: false,
   setBasemapOffline: (basemapOffline) => set({ basemapOffline }),
   cursor: { lon: 78.7749, lat: 28.4515, zoom: 15 },

@@ -4,12 +4,15 @@ import Dock from "./components/Dock";
 import { TopBar, Rail, Readout } from "./components/Chrome";
 import { SourceCards } from "./components/Panels";
 import DemoMode from "./components/DemoMode";
+import Palette from "./components/Palette";
+import SignIn from "./components/SignIn";
 import { Boundary, OfflineBanner } from "./components/Guards";
 import { useStore } from "./lib/store";
 
 export default function App() {
   const { load, loaded, error, toggleLayer, layers, setDockTab, playAlignment,
-          runPipeline, selectConflict, conflicts, selectedConflict } = useStore();
+          runPipeline, selectConflict, conflicts, selectedConflict,
+          signedIn } = useStore();
 
   useEffect(() => { load(); }, []);
 
@@ -46,7 +49,9 @@ export default function App() {
         <div className="stage">
           <Boundary label="Map"><MapView /></Boundary>
           <OfflineBanner />
-          {loaded && <Boundary label="Demo mode"><DemoMode /></Boundary>}
+          {loaded && signedIn && <Boundary label="Demo mode"><DemoMode /></Boundary>}
+          {loaded && signedIn && <Boundary label="Command palette"><Palette /></Boundary>}
+          {loaded && !signedIn && <Boundary label="Sign in"><SignIn /></Boundary>}
           {loaded && <Boundary label="Panels"><SourceCards /></Boundary>}
           <Readout />
           {loaded && <Boundary label="Data dock"><Dock /></Boundary>}
