@@ -1,0 +1,201 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>slide1</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 1333px; height: 750px; background: #fff;
+         font-family: Calibri, Arial, sans-serif; position: relative;
+         overflow: hidden; }
+
+  .title { position: absolute; top: 26px; left: 0; width: 100%;
+           text-align: center; font-family: "Bookman Old Style", Georgia, serif;
+           font-size: 40px; font-weight: 700; }
+  .team { position: absolute; top: 30px; left: 34px; width: 132px; height: 62px;
+          border: 2px solid #6E51A8; border-radius: 50%;
+          display: grid; place-items: center; font-size: 16px; }
+  .sih { position: absolute; top: 22px; right: 30px; width: 190px; height: 74px;
+         border: 1px dashed #bbb; border-radius: 4px; display: grid;
+         place-items: center; font-size: 11px; color: #999; text-align: center; }
+  .footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 34px;
+            background: #1F6FB2; color: #fff; display: flex; align-items: center;
+            justify-content: center; font-size: 14px; }
+  .footer .num { position: absolute; right: 22px; font-weight: 700; }
+
+  /* ---------- left: the idea ---------- */
+  .lead { position: absolute; left: 34px; top: 110px; width: 444px;
+          font-size: 14.2px; line-height: 1.47; }
+  .lead .hook { font-size: 17px; font-weight: 700; color: #C2410C;
+                line-height: 1.35; margin-bottom: 9px; }
+  .lead p { margin: 0 0 9px; }
+
+  .card { position: absolute; left: 34px; width: 444px;
+          border: 2.5px dashed #444; border-radius: 12px; padding: 11px 14px 12px; }
+  .card h3 { margin: 0 0 7px; font-size: 16.5px; }
+  .card ul { margin: 0; padding-left: 17px; font-size: 12.8px; line-height: 1.46; }
+  .card li { margin-bottom: 3px; }
+
+  .stats { position: absolute; left: 34px; top: 636px; width: 444px;
+           display: flex; gap: 10px; }
+  .stat { flex: 1; border: 1px solid #bbb; border-radius: 6px; padding: 6px 4px;
+          text-align: center; background: #F7F8FA; }
+  .stat b { display: block; font-size: 17px; color: #0E8074; line-height: 1.1; }
+  .stat span { font-size: 9.4px; color: #555; }
+
+  /* ---------- right: user flow ---------- */
+  .flowhead { position: absolute; left: 760px; top: 104px; font-size: 21px;
+              font-weight: 700; color: #C2410C; }
+  .flow { position: absolute; left: 500px; top: 132px; width: 804px; height: 556px;
+          border: 2.5px dashed #444; border-radius: 12px; }
+
+  .lane { position: absolute; left: 10px; width: 784px; border-radius: 7px; }
+  .lane > .lbl { position: absolute; top: -9px; left: 8px; font-size: 10px;
+                 font-weight: 700; padding: 2px 7px; border-radius: 4px;
+                 color: #fff; white-space: nowrap; }
+
+  .n { position: absolute; background: #fff; border: 1px solid #777;
+       border-radius: 3px; font-size: 9.2px; line-height: 1.2; text-align: center;
+       padding: 4px 3px; }
+  .n b { font-size: 9.6px; }
+  .n i { display: block; font-style: normal; font-size: 7.4px; color: #666;
+         margin-top: 1px; }
+  .dia { position: absolute; border: 1px solid #777; background: #fff;
+         transform: rotate(45deg); display: grid; place-items: center; }
+  .dia span { transform: rotate(-45deg); font-size: 8.4px; line-height: 1.1;
+              text-align: center; display: block; }
+  svg.w { position: absolute; inset: 0; pointer-events: none; }
+</style>
+
+<div class="team">NovaX</div>
+<div class="title">IDEA &amp; PROPOSED SOLUTION</div>
+<div class="sih">SIH 2026 logo<br>(paste from template)</div>
+
+<div class="lead">
+  <div class="hook">Chandausi is where NAKSHA launched.<br>
+    AI finds 5,488 buildings there. The municipal record has 6.</div>
+  <p><b>KSHETRA</b> harmonizes the ten disagreeing datasets a city holds into one
+  cadastral layer, and attaches an <b>honest confidence</b> to every decision — so
+  an officer reviews only what is genuinely uncertain.</p>
+  <p>Legacy sheets carry 3–4&nbsp;m error against orthoimagery specified to
+  10&nbsp;cm, so overlaying them is meaningless. We georeference first, match on
+  geometry, and repair topology without losing land.</p>
+</div>
+
+<div class="card" style="top:300px; background:#FCEEE3;">
+  <h3>What makes it different</h3>
+  <ul>
+    <li><b>It closes the loop.</b> NAKSHA's own review names ground truthing its
+      biggest lagging component — so KSHETRA computes <b>where to send the next
+      surveyor</b>, by submodular optimisation over a GP error field.</li>
+    <li><b>Its confidence is calibrated, not scored.</b> When it says 96%, 96% of
+      those are right — and the reliability curve is in the app.</li>
+    <li><b>It refuses to guess.</b> Parcel-sized gaps are flagged for survey, never
+      filled. Filling them would fabricate a boundary.</li>
+    <li><b>It proves no land was lost.</b> A double-entry area ledger reconciles
+      every square metre through the pipeline.</li>
+  </ul>
+</div>
+
+<div class="stats">
+  <div class="stat"><b>915 : 1</b><span>AI vs municipal<br>footprints</span></div>
+  <div class="stat"><b>0.00009</b><span>calibration<br>error (ECE)</span></div>
+  <div class="stat"><b>5,038 → 0</b><span>overlapping<br>parcel pairs</span></div>
+  <div class="stat"><b>35.9%</b><span>better than<br>random survey</span></div>
+</div>
+
+<div class="flowhead">User Flow — a revenue officer's session</div>
+<div class="flow">
+  <svg class="w" width="804" height="556">
+    <defs><marker id="b" markerWidth="7" markerHeight="7" refX="6" refY="3.5"
+            orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#555"/></marker></defs>
+    <g stroke="#555" stroke-width="1.4" fill="none" marker-end="url(#b)">
+      <path d="M150,60 L182,60"/><path d="M330,60 L362,60"/>
+      <path d="M510,60 L542,60"/>
+      <path d="M660,82 L660,120"/>
+      <path d="M600,150 L560,150"/><path d="M420,150 L380,150"/>
+      <path d="M200,150 L160,150"/>
+      <path d="M92,172 L92,214"/>
+      <path d="M190,240 L232,240"/>
+      <path d="M330,262 L330,300"/>
+      <path d="M262,330 L214,330"/>
+      <path d="M470,330 L524,330"/>
+      <path d="M92,358 L92,404"/>
+      <path d="M210,430 L258,430"/>
+      <path d="M430,430 L478,430"/>
+      <path d="M660,358 L660,404"/>
+    </g>
+  </svg>
+
+  <!-- lane 1: set up -->
+  <div class="lane" style="top:24px;height:72px;background:#DCEBFA;">
+    <span class="lbl" style="background:#1F6FB2;">A. Sign in &amp; scope the work</span>
+  </div>
+  <div class="n" style="left:26px;top:46px;width:124px;">
+    <b>Sign in by role</b><i>public · surveyor · clerk · tehsildar</i></div>
+  <div class="n" style="left:182px;top:46px;width:148px;">
+    <b>Pick the ward</b><i>Chandausi ward 04 · EPSG:32644</i></div>
+  <div class="n" style="left:362px;top:46px;width:148px;">
+    <b>Load the sources</b><i>MS footprints · OSM · legacy sheet · GNSS</i></div>
+  <div class="n" style="left:542px;top:46px;width:236px;">
+    <b>System profiles every column automatically</b>
+    <i>7/7 fields mapped · area unit inferred as bigha (96.7%)</i></div>
+
+  <!-- lane 2: harmonize -->
+  <div class="lane" style="top:120px;height:70px;background:#EFE4F7;">
+    <span class="lbl" style="background:#7A3FA8;">B. Run harmonization — watch it happen</span>
+  </div>
+  <div class="n" style="left:600px;top:142px;width:178px;">
+    <b>Georeference</b><i>the sheet slides into place · 8.45 m → 3.13 m</i></div>
+  <div class="n" style="left:420px;top:142px;width:140px;">
+    <b>Match parcels</b><i>95.6% geometric, not an ID join</i></div>
+  <div class="n" style="left:200px;top:142px;width:180px;">
+    <b>Repair topology</b><i>6,168 → 215 errors · overlaps to zero</i></div>
+  <div class="n" style="left:26px;top:142px;width:134px;">
+    <b>Score confidence</b><i>calibrated p per parcel</i></div>
+
+  <!-- decision -->
+  <div class="dia" style="left:58px;top:214px;width:68px;height:68px;">
+    <span>p ≥ 0.95?</span></div>
+  <div class="n" style="left:232px;top:228px;width:150px;background:#DFF1E4;">
+    <b>Auto-finalised</b><i>no human time spent</i></div>
+
+  <!-- lane 3: review -->
+  <div class="lane" style="top:300px;height:66px;background:#FDF0D5;">
+    <span class="lbl" style="background:#9A6710;">C. Review only what is uncertain — 257 of 3,047</span>
+  </div>
+  <div class="n" style="left:262px;top:318px;width:208px;">
+    <b>Queue sorted by area × (1 − confidence)</b>
+    <i>the costly doubts first</i></div>
+  <div class="n" style="left:26px;top:318px;width:188px;">
+    <b>Evidence panel</b><i>why it matched · which source wins · SHAP</i></div>
+  <div class="n" style="left:524px;top:312px;width:254px;">
+    <b>Accept · Reject · Escalate · Send for field survey</b>
+    <i>permitted actions depend on the signed-in role</i></div>
+
+  <!-- lane 4: act -->
+  <div class="lane" style="top:404px;height:76px;background:#D6F0EC;">
+    <span class="lbl" style="background:#0E8074;">D. Act on the result</span>
+  </div>
+  <div class="n" style="left:26px;top:424px;width:184px;">
+    <b>Encroachment dossier</b>
+    <i>9 sites, 252 m² of public land · flagged for the officer</i></div>
+  <div class="n" style="left:258px;top:424px;width:172px;">
+    <b>Survey plan ★</b>
+    <i>19 GCPs ranked · predicted 1.45 m, achieved 1.32 m</i></div>
+  <div class="n" style="left:478px;top:424px;width:150px;">
+    <b>Export</b><i>GeoJSON · Shapefile · OGC API · signed PDF</i></div>
+  <div class="n" style="left:648px;top:424px;width:130px;">
+    <b>Audit trail</b><i>hash-chained · tamper-evident</i></div>
+
+  <!-- feedback -->
+  <div class="n" style="left:600px;top:498px;width:178px;background:#F3E8F6;">
+    <b>Reviewer decisions become labelled data</b>
+    <i>thresholds recalibrated, and the change is logged</i></div>
+  <svg class="w" width="804" height="556">
+    <g stroke="#7A3FA8" stroke-width="1.4" fill="none" stroke-dasharray="4 3"
+       marker-end="url(#b)">
+      <path d="M600,516 L92,516 L92,372"/>
+    </g>
+  </svg>
+</div>
+
+<div class="footer">@SIH Idea submission- Template<span class="num">1</span></div>
