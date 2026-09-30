@@ -38,3 +38,4 @@ scikit-learn>=1.5    # cross-check only; our metrics are hand-implemented
 
 # --- dev ---
 pytest>=8.0
+pymupdf  # research PDF typesetting (scripts/build_research_pdf.py)
