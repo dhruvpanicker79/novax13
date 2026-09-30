@@ -1,0 +1,10 @@
+# Serving dependencies only.
+#
+# api/main.py imports kshetra.audit, which is stdlib hashlib + json. Nothing
+# in the request path needs numpy, scipy, shapely or xgboost — those build the
+# artifacts offline and are pinned in requirements.txt. Keeping them out of
+# the image takes the deploy from ~900 MB to ~200 MB and the cold start with
+# it.
+fastapi>=0.115
+uvicorn[standard]>=0.32
+pydantic>=2.9

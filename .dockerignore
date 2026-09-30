@@ -1,0 +1,16 @@
+.git
+.venv
+.venv-linux
+__pycache__
+*.pyc
+node_modules
+frontend/node_modules
+frontend/dist
+dist
+dist.new
+data/raw
+data/out
+data/audit
+docs
+scripts
+*.md

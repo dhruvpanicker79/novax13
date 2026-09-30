@@ -1,0 +1,23 @@
+# Render blueprint. Connect the repo in the Render dashboard and it reads this
+# file; nothing needs configuring by hand.
+#
+# One service, not two. The UI is static and could live on Render's CDN, but
+# then the page and the API would sit on different origins and the audit
+# chain and the redaction would need CORS to agree with them. A single
+# container keeps the security story intact and the demo to one URL.
+services:
+  - type: web
+    name: kshetra
+    runtime: docker
+    plan: free
+    # Closest free region to the judges.
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    # Cheap, and it reports whether the pipeline artifacts actually shipped.
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Only needed if the UI is ever served from a different origin than the
+      # API. Same-origin deploys leave this empty. Comma-separated.
+      - key: KSHETRA_ALLOWED_ORIGINS
+        value: ""

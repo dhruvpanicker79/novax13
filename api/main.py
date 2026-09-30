@@ -30,6 +30,7 @@ from typing import Any, Literal
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,12 +47,19 @@ app = FastAPI(
     description="Automated harmonization of multi-source urban land records",
     version="0.2.0",
 )
+#: Local dev hosts, plus anything named explicitly at deploy time. Deployed,
+#: the UI is served from this same origin and needs no entry here at all --
+#: an open allowlist on a service that returns owner names would defeat the
+#: redaction below, so the deployed default is to add nothing.
+ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173",
+                   "http://localhost:8080", "http://127.0.0.1:8080"]
+ALLOWED_ORIGINS += [o.strip() for o in
+                    os.environ.get("KSHETRA_ALLOWED_ORIGINS", "").split(",")
+                    if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    # Demo hosts only. An open allowlist on a service that returns owner names
-    # would defeat the redaction below.
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173",
-                   "http://localhost:8080", "http://127.0.0.1:8080"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
@@ -363,3 +371,15 @@ def ogc_items(cid: str, role: str = Depends(get_role),
                        "href": f"/ogc/collections/{cid}/items"
                                f"?limit={limit}&offset={offset}"}],
         })
+
+
+# --------------------------------------------------------------------------
+# the built UI
+# --------------------------------------------------------------------------
+# Mounted last, so every route above still wins: "/" falls through to the SPA
+# only after the API and OGC paths have had their chance. Absent in local
+# development, where Vite serves the UI on its own port -- so the mount is
+# conditional rather than assumed.
+DIST = ROOT / "dist"
+if DIST.is_dir():
+    app.mount("/", StaticFiles(directory=str(DIST), html=True), name="ui")
