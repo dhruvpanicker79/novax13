@@ -4,8 +4,29 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { useStore } from "../lib/store";
 import type { FC } from "../lib/types";
 
-const SAT =
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+/** Esri basemaps: free, no key, and three registers for three jobs --
+ *  imagery to prove the parcels sit on real buildings, a light canvas when the
+ *  data itself should carry all the colour, and a dark one for a projector in
+ *  a bright room. */
+const BASEMAPS: Record<string, {
+  url: string; bright: [number, number]; sat: number; maxzoom: number;
+}> = {
+  imagery: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    bright: [0.34, 1.0], sat: -0.5, maxzoom: 19,
+  },
+  light: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    // Esri's canvas basemaps stop at z16. Declaring that lets MapLibre
+    // overzoom the last real level; leaving it at 19 asks for tiles that do
+    // not exist and the map simply goes blank in 3D.
+    bright: [0.0, 1.0], sat: 0, maxzoom: 16,
+  },
+  dark: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    bright: [0.0, 1.0], sat: 0, maxzoom: 16,
+  },
+};
 
 /** Sequential single-hue ramp for confidence. Never a rainbow: a rainbow
  *  implies category boundaries that do not exist in a continuous measure. */
@@ -46,26 +67,27 @@ export default function MapView() {
       style: {
         version: 8,
         glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
-        sources: {
-          sat: { type: "raster", tiles: [SAT], tileSize: 256, maxzoom: 19,
-                 attribution: "Imagery © Esri" },
-        },
+        sources: Object.fromEntries(Object.entries(BASEMAPS).map(([k, v]) => [
+          k, { type: "raster", tiles: [v.url], tileSize: 256, maxzoom: v.maxzoom,
+               attribution: "© Esri" },
+        ])) as any,
         layers: [
           // Drawn beneath the imagery so the map degrades to a neutral sheet
           // rather than to black if tiles never arrive. Demo venues lose wifi.
           { id: "bg", type: "background",
             paint: { "background-color": "#e9ecef" } },
-          // Light chrome, so the imagery is lifted rather than dimmed --
-          // washed slightly and desaturated so it reads as a backdrop, with
-          // the parcel colours carrying the information on top.
-          { id: "sat", type: "raster", source: "sat",
+          // One raster layer per basemap; only the visible one fetches tiles.
+          ...Object.entries(BASEMAPS).map(([k, v]) => ({
+            id: `bm-${k}`, type: "raster" as const, source: k,
+            layout: { visibility: (k === "imagery" ? "visible" : "none") as any },
             paint: {
-              "raster-brightness-min": 0.34,
-              "raster-brightness-max": 1.0,
-              "raster-saturation": -0.58,
-              "raster-contrast": -0.16,
-              "raster-opacity": 0.72,
-            } },
+              "raster-brightness-min": v.bright[0],
+              "raster-brightness-max": v.bright[1],
+              "raster-saturation": v.sat,
+              "raster-contrast": k === "imagery" ? -0.16 : 0,
+              "raster-opacity": k === "imagery" ? 0.74 : 0.9,
+            },
+          })),
         ],
       },
       center: [78.7749, 28.4515],
@@ -76,6 +98,17 @@ export default function MapView() {
     m.addControl(new maplibregl.ScaleControl({ maxWidth: 110, unit: "metric" }), "bottom-right");
     map.current = m;
     (window as any).__map = m;   // diagnostics handle
+    m.on("style.load", () => {
+      // Only visible once pitched; without it a tilted map ends at a hard
+      // horizon line.
+      try {
+        (m as any).setSky?.({
+          "sky-color": "#b9d3e8", "horizon-color": "#e8eef4",
+          "fog-color": "#eef1f4", "fog-ground-blend": 0.6,
+          "sky-horizon-blend": 0.7, "horizon-fog-blend": 0.5,
+        });
+      } catch { /* older maplibre: no sky, no loss */ }
+    });
 
     let tileFails = 0;
     m.on("error", (e: any) => {
@@ -197,14 +230,14 @@ export default function MapView() {
         id: "l-harm", type: "fill", source: "harmonized",
         paint: {
           "fill-color": "#14884a",
-          "fill-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.3, 16, 0.26, 18, 0.16],
+          "fill-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.34, 16, 0.3, 18, 0.18],
         },
       });
       m.addLayer({
         id: "l-harm-line", type: "line", source: "harmonized",
         paint: {
           "line-color": "#0f7a3f",
-          "line-width": ["interpolate", ["linear"], ["zoom"], 13, 1.1, 15, 1.8, 18, 3.0],
+          "line-width": ["interpolate", ["linear"], ["zoom"], 13, 1.3, 15, 2.2, 18, 3.6],
           "line-opacity": 1,
         },
       });
@@ -278,12 +311,30 @@ export default function MapView() {
         paint: { "text-color": "#171b20", "text-halo-color": "#ffffff", "text-halo-width": 1.6 },
       });
 
-      // ---- epoch t1 footprints ----
+      // ---- epoch t1 footprints, flat ----
       m.addLayer({
         id: "l-bldg", type: "fill", source: "buildings",
         layout: { visibility: "none" },
         paint: { "fill-color": "#5a646e", "fill-opacity": 0.28,
                  "fill-outline-color": "#2f363d" },
+      });
+
+      // ---- the same footprints extruded to their surveyed height ----
+      // A building that gained storeys is identical in plan view. Extrusion is
+      // the only way the viewer sees what the DSM sees, and it is also what
+      // makes the scene read as a city rather than a diagram.
+      m.addLayer({
+        id: "l-bldg-3d", type: "fill-extrusion", source: "buildings",
+        layout: { visibility: "none" },
+        paint: {
+          "fill-extrusion-height": ["coalesce", ["get", "height_m"], 6],
+          "fill-extrusion-base": 0,
+          "fill-extrusion-opacity": 0.92,
+          "fill-extrusion-color": ["interpolate", ["linear"],
+            ["coalesce", ["get", "height_m"], 6],
+            3, "#cfd6dd", 8, "#9fb0c0", 14, "#6d8499", 20, "#42607a"],
+          "fill-extrusion-vertical-gradient": true,
+        },
       });
 
       // ---- change events ----
@@ -415,11 +466,36 @@ export default function MapView() {
     vis("l-govt", get("govt").on);
     vis("l-govt-line", get("govt").on);
     vis("l-conf-pt", get("conflicts").on);
-    vis("l-bldg", get("buildings").on);
+    for (const k of Object.keys(BASEMAPS)) vis(`bm-${k}`, k === s.basemap);
+    // Flat footprints when the map is level, extruded when it is pitched --
+    // never both, or the fill z-fights the extrusion base.
+    vis("l-bldg", get("buildings").on && !s.pitched);
+    vis("l-bldg-3d", get("buildings").on && s.pitched);
     vis("l-change", get("change").on);
     for (const l of ["l-encroach", "l-encroach-halo", "l-encroach-lbl"])
       vis(l, get("encroach").on);
-  }, [s.layers, ready]);
+    // On the dark canvas the parcel fill has to lift instead of darken, or
+    // the layer vanishes into the background it was drawn to stand out from.
+    const dark = s.basemap === "dark";
+    m.setPaintProperty("l-harm", "fill-color", dark ? "#3fbf5f" : "#14884a");
+    m.setPaintProperty("l-harm-line", "line-color", dark ? "#6ee089" : "#0f7a3f");
+    m.setPaintProperty("l-leg", "line-color", dark ? "#f0a94a" : "#c2650a");
+  }, [s.layers, s.basemap, s.pitched, ready]);
+
+  // ---- camera pitch ----------------------------------------------------
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !ready) return;
+    // Extruded 6 m buildings are invisible at ward zoom, so tilting also
+    // moves in far enough for the extrusion to read. Coming back out restores
+    // the whole-ward view.
+    m.easeTo({
+      pitch: s.pitched ? 55 : 0,
+      bearing: s.pitched ? -20 : 0,
+      zoom: s.pitched ? Math.max(m.getZoom(), 16.8) : Math.min(m.getZoom(), 15.2),
+      duration: 1100,
+    });
+  }, [s.pitched, ready]);
 
   // ---- selection highlight --------------------------------------------
   useEffect(() => {

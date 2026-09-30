@@ -70,13 +70,18 @@ export function TopBar() {
  *  plainly whether this session is seeing the full record or a redacted one,
  *  so nobody mistakes withheld data for missing data. */
 function RolePill() {
-  const { role, signOut } = useStore();
+  const { role, signOut, operator } = useStore();
   const r = ROLES.find((x) => x.id === role)!;
   return (
     <button className="modepill" onClick={signOut}
             title="Sign out and change role">
       <I.Shield />
-      <span>{r.label}</span>
+      <span>{operator || r.label}</span>
+      {/* Only show the role separately when it is not already the name shown,
+          or the pill reads "Tehsildar Tehsildar". */}
+      {operator && (
+        <span style={{ color: "var(--ink-faint)", fontSize: 11 }}>{r.label}</span>
+      )}
       <span className={`chip ${r.seesOwner ? "ok" : "warn"}`}
             style={{ marginLeft: 2 }}>
         {r.seesOwner ? "full record" : "redacted"}

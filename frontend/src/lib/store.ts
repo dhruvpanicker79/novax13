@@ -57,6 +57,21 @@ export function redact(props: Record<string, any>, role: Role) {
   return out;
 }
 
+
+/** Fixture accounts. The role is a property of the account, not a choice the
+ *  operator makes at sign-in. Deployment replaces this with the department
+ *  directory; nothing here is a credential store. */
+export interface Account {
+  user: string; pw: string; name: string; role: Role;
+}
+
+export const ACCOUNTS: Account[] = [
+  { user: "r.sharma", pw: "kshetra", name: "R. Sharma", role: "tehsildar" },
+  { user: "a.verma", pw: "kshetra", name: "A. Verma", role: "clerk" },
+  { user: "s.yadav", pw: "kshetra", name: "S. Yadav", role: "surveyor" },
+  { user: "guest", pw: "guest", name: "Public access", role: "public" },
+];
+
 export type LayerId =
   | "reference" | "legacy" | "aligned" | "harmonized" | "govt"
   | "residuals" | "confidence" | "conflicts" | "survey" | "uncertainty"
@@ -132,8 +147,13 @@ interface S {
 
   role: Role;
   signedIn: boolean;
-  signIn: (r: Role) => void;
+  operator: string;
+  signIn: (r: Role, name?: string) => void;
   signOut: () => void;
+  basemap: "imagery" | "light" | "dark";
+  setBasemap: (b: S["basemap"]) => void;
+  pitched: boolean;
+  setPitched: (v: boolean) => void;
   basemapOffline: boolean;
   setBasemapOffline: (v: boolean) => void;
   cursor: { lon: number; lat: number; zoom: number };
@@ -173,8 +193,20 @@ export const useStore = create<S>((set, get) => ({
   audit: [],
   role: "tehsildar",
   signedIn: false,
-  signIn: (role) => set({ role, signedIn: true }),
-  signOut: () => set({ signedIn: false, selected: null, selectedConflict: null }),
+  operator: "",
+  signIn: (role, name = "") => set({ role, operator: name, signedIn: true }),
+  signOut: () => set({ signedIn: false, operator: "", selected: null,
+                       selectedConflict: null }),
+  basemap: "imagery",
+  setBasemap: (basemap) => set({ basemap }),
+  pitched: false,
+  // Turning the camera on also turns the buildings on; a pitched
+  // map with flat footprints looks broken rather than three-dimensional.
+  setPitched: (pitched) => set((st) => ({
+    pitched,
+    layers: st.layers.map((l) =>
+      l.id === "buildings" ? { ...l, on: pitched } : l),
+  })),
   basemapOffline: false,
   setBasemapOffline: (basemapOffline) => set({ basemapOffline }),
   cursor: { lon: 78.7749, lat: 28.4515, zoom: 15 },

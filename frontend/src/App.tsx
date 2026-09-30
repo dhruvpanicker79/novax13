@@ -4,6 +4,7 @@ import Dock from "./components/Dock";
 import { TopBar, Rail, Readout } from "./components/Chrome";
 import { SourceCards } from "./components/Panels";
 import DemoMode from "./components/DemoMode";
+import MapControls from "./components/MapControls";
 import Palette from "./components/Palette";
 import SignIn from "./components/SignIn";
 import { Boundary, OfflineBanner } from "./components/Guards";
@@ -24,6 +25,7 @@ export default function App() {
       if (n >= 1 && n <= layers.length) { toggleLayer(layers[n - 1].id); return; }
       if (e.key === " ") { e.preventDefault(); runPipeline(); }
       if (e.key === "\\") playAlignment();
+      if (e.key === "p") { const st = useStore.getState(); st.setPitched(!st.pitched); return; }
       if (e.key === "[" || e.key === "]") {
         const open = conflicts.filter((c) => c.status === "open");
         if (!open.length) return;
@@ -49,6 +51,7 @@ export default function App() {
         <div className="stage">
           <Boundary label="Map"><MapView /></Boundary>
           <OfflineBanner />
+          {loaded && signedIn && <Boundary label="Map controls"><MapControls /></Boundary>}
           {loaded && signedIn && <Boundary label="Demo mode"><DemoMode /></Boundary>}
           {loaded && signedIn && <Boundary label="Command palette"><Palette /></Boundary>}
           {loaded && !signedIn && <Boundary label="Sign in"><SignIn /></Boundary>}
